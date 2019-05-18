@@ -12,8 +12,7 @@ class MusicFile(object):
 
     @property
     def bitrate(self):
-        tags = TinyTag.get(self.path)
-        return tags.bitrate
+        return TinyTag.get(self.path).bitrate
 
     @property
     def size(self):

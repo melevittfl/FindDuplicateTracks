@@ -48,11 +48,11 @@ def test_all_files():
 
 
 def test_highest_bitrate(track_list):
-    assert highest_bitrate(track_list) == track_list[0]  # Aria is 320VBR vs 256VBR
+    assert highest_bitrate(track_list) == track_list[0]  # amazing_track is 256 vs. 128
 
 
 def test_largest_size(track_list):
-    assert largest_size(track_list) == track_list[0]  # Aria is larger
+    assert largest_size(track_list) == track_list[0]  # amazing_track is larger
 
 
 def test_files_are_equal(equal_tracks):
