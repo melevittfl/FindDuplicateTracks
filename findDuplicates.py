@@ -18,8 +18,20 @@ class MusicFile(object):
     def size(self):
         return Path.stat(self.path).st_size
 
+    @property
+    def full_path_name(self):
+        return self.__str__()
+
+    @property
+    def name(self):
+        return self.__repr__()
+
+    @property
+    def album(self):
+        return self.path.parent.resolve()
+
     def __repr__(self):
-        return str(self.path.name)
+        return self.path.name
 
     def __str__(self):
         return str(self.path.resolve())
@@ -39,7 +51,7 @@ def all_files(starting_path=".", pattern="*"):
 def find_matches_by_partial_name(starting_path=".",tail="*.m4a"):
     partial_name_matches = {}
     for file in all_files(starting_path, tail):
-        partial_name = str(file).rstrip(' 1.m4a')
+        partial_name = file.full_path_name.rstrip(' 1.m4a')
 
         duplicate = partial_name_matches.get(partial_name)
 
@@ -69,7 +81,7 @@ def find_extra_tracks(starting_path=".", tail="*.m4a"):
 
     for __, tracks in matches.items():
         if len(tracks) > 1:
-            print(tracks[0].path.parent.resolve())
+            print(tracks[0].album)
             for track in tracks:
                 print(f"{track} - VBR: {track.bitrate} Size: {track.size}")
 
@@ -78,13 +90,13 @@ def find_extra_tracks(starting_path=".", tail="*.m4a"):
             else:
                 tracks.remove(highest_bitrate(tracks))
 
-            print(f"Deleting {tracks}...", end=" ")
-            if actually_delete:
-                for track in tracks:
+            for track in tracks:
+                print(f"Deleting {track}...", end="")
+                if actually_delete:
                     track.path.unlink()
                     print("Deleted")
-            else:
-                print("Test mode. Track not deleted")
+                else:
+                    print("Test mode. Track not deleted")
 
 
 if __name__ == '__main__':

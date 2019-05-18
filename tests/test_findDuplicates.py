@@ -41,6 +41,18 @@ def test_musicfile_returns_path(music_file):
     assert isinstance(music_file.path, Path)
 
 
+def test_musicfile_returns_short_name(music_file):
+    assert music_file.name == test_file.name
+
+
+def test_musicfile_returns_full_path_name(music_file):
+    assert music_file.full_path_name == str(test_file.resolve())
+
+
+def test_musicfile_returns_parent_path(music_file):
+    assert music_file.album == test_file.parent.resolve()
+
+
 def test_all_files():
     expected = list(Path(".").rglob(".py"))
     actual = list(all_files(".", ".py"))
