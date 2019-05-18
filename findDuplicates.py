@@ -82,7 +82,7 @@ def find_extra_tracks(starting_path=".", tail="*.m4a"):
             print(f"Deleting {tracks}...", end=" ")
             if actually_delete:
                 for track in tracks:
-                    track.path.owner()
+                    track.path.unlink()
                     print("Deleted")
             else:
                 print("Test mode. Track not deleted")
