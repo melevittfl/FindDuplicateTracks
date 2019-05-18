@@ -22,7 +22,7 @@ class MusicFile(object):
         return str(self.path.name)
 
     def __str__(self):
-        return str(self.path.absolute())
+        return str(self.path.resolve())
 
     def __eq__(self, other):
         '''Files are equal is they have the same size and bitrate'''
@@ -69,7 +69,7 @@ def find_extra_tracks(starting_path=".", tail="*.m4a"):
 
     for __, tracks in matches.items():
         if len(tracks) > 1:
-            print(tracks[0].path.parent.absolute())
+            print(tracks[0].path.parent.resolve())
             for track in tracks:
                 print(f"{track} - VBR: {track.bitrate} Size: {track.size}")
 
