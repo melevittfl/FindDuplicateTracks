@@ -2,7 +2,7 @@ from tinytag import TinyTag
 from pathlib import Path
 import sys
 
-actually_delete=False
+actually_delete = False
 
 
 class MusicFile(object):
