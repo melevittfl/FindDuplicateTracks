@@ -84,9 +84,11 @@ def find_extra_tracks(starting_path=".", tail="*.m4a"):
             for track in tracks:
                 print(f"{track} - VBR: {track.bitrate} Size: {track.size}")
 
-            if tracks[0] == tracks[1]:
+            if all(track == tracks[0] for track in tracks):
+                print("Tracks are equal, will keep the shortest named one")
                 tracks.remove(shortest_name(tracks))
             else:
+                print("Tracks are not the same, will keep the one with the highest bitrate")
                 tracks.remove(highest_bitrate(tracks))
 
             for track in tracks:
