@@ -55,11 +55,10 @@ def find_matches_by_partial_name(starting_path=".",tail="*.m4a"):
 
         duplicate = partial_name_matches.get(partial_name)
 
-        if duplicate:
-            partial_name_matches[partial_name].append(file)
-        else:
+        if not duplicate:
             partial_name_matches[partial_name] = []
-            partial_name_matches[partial_name].append(file)
+
+        partial_name_matches[partial_name].append(file)
 
     return partial_name_matches
 
