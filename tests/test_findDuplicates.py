@@ -75,5 +75,9 @@ def test_shortest_name(equal_tracks):
     assert shortest_name(equal_tracks) == equal_tracks[1]
 
 
+def test_best_track(equal_tracks):
+    assert best_track(MusicFile(test_file), MusicFile(second_file)) == MusicFile(test_file)
+    assert best_track(equal_tracks[0], equal_tracks[1]) == equal_tracks[0]
+    assert best_track(test_file, second_file) == NotImplemented
 
 

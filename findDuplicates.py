@@ -40,6 +40,8 @@ class MusicFile(object):
         '''Files are equal is they have the same size and bitrate'''
         if isinstance(other, MusicFile):
             return (self.bitrate == other.bitrate) and (self.size == other.size)
+        else:
+            return NotImplemented
 
 
 def all_files(starting_path=".", pattern="*"):
@@ -73,6 +75,19 @@ def largest_size(track_list):
 
 def shortest_name(track_list):
     return sorted(track_list, key=lambda x: len(x.path.name), reverse=True)[0]
+
+
+def best_track(first: MusicFile, second: MusicFile):
+    """
+    Compare two MusicFiles and return the one that lexically the shortest name (if
+    the two files have the same size and bitrate) or the one with the highest bitrate)
+    """
+    if not isinstance(first, MusicFile) and not isinstance(second, MusicFile):
+        return NotImplemented
+    if first == second:
+        return shortest_name([first, second])
+    else:
+        return highest_bitrate([first, second])
 
 
 def find_extra_tracks(starting_path=".", tail="*.m4a"):
