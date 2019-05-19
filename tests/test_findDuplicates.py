@@ -1,5 +1,4 @@
 import pytest
-from pathlib import Path
 from collections import namedtuple
 
 from findDuplicates import *
@@ -80,10 +79,21 @@ def test_shortest_name(test_tracks):
 
 
 def test_best_track(test_tracks):
+    # Different bitrate files should return the higher one
     assert best_track(test_tracks["better_worse"].better,
                       test_tracks["better_worse"].worse) == test_tracks["better_worse"].better
+
+    # Equal size and bitrate files should return the shorter name
     assert best_track(test_tracks["equal"].longer,
                       test_tracks["equal"].shorter) == test_tracks["equal"].shorter
+
+    # Comparing the first file with None should return the first file
+    assert best_track(test_tracks["equal"].shorter, None) == test_tracks["equal"].shorter
+
+    # Comparing the None with the second file should return the second file
+    assert best_track(None, test_tracks["equal"].shorter) == test_tracks["equal"].shorter
+
+    # Comparing a MusicFile with a non MusicFile should return NotImplimented
     assert best_track(test_tracks["equal"].longer, "Not A File") == NotImplemented
 
 
