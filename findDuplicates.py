@@ -77,24 +77,18 @@ def shortest_name(track_list):
     return sorted(track_list, key=lambda x: len(x.path.name), reverse=True)[0]
 
 
-def best_track(first: MusicFile = None, second: MusicFile = None):
+def best_track(first_file: MusicFile = None, second_file: MusicFile = None) -> MusicFile:
     """
     Compare two MusicFiles and return the one that is present if the is only one,
     lexically the shortest name (if the two files have the same size and bitrate),
     or the one with the highest bitrate)
     """
-    if not first:
-        best_one = second
-    elif not second:
-        best_one = first
-    elif not (isinstance(first, MusicFile) and isinstance(second, MusicFile)):
-        best_one = NotImplemented
-    elif first == second:
-        best_one = shortest_name([first, second])
-    else:
-        best_one = highest_bitrate([first, second])
+    return first_file if not second_file \
+        else second_file if not first_file \
+        else NotImplemented if not (isinstance(first_file, MusicFile) and isinstance(second_file, MusicFile)) \
+        else shortest_name([first_file, second_file]) if first_file == second_file \
+        else highest_bitrate([first_file, second_file])
 
-    return best_one
 
 
 def find_list_to_delete():
