@@ -74,6 +74,10 @@ def test_files_are_equal(test_tracks):
     assert test_tracks["equal"].longer == test_tracks["equal"].shorter
 
 
+def test_files_are_not_equal(test_tracks):
+    assert test_tracks["equal"].longer != test_tracks["better_worse"].worse
+
+
 def test_shortest_name(test_tracks):
     assert shortest_name(test_tracks["equal"]) == test_tracks["equal"].shorter
 
