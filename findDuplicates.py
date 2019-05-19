@@ -82,7 +82,7 @@ def best_track(first: MusicFile, second: MusicFile):
     Compare two MusicFiles and return the one that lexically the shortest name (if
     the two files have the same size and bitrate) or the one with the highest bitrate)
     """
-    if not isinstance(first, MusicFile) and not isinstance(second, MusicFile):
+    if not (isinstance(first, MusicFile) and isinstance(second, MusicFile)):
         return NotImplemented
     if first == second:
         return shortest_name([first, second])
