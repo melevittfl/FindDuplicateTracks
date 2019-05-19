@@ -90,6 +90,10 @@ def best_track(first: MusicFile, second: MusicFile):
         return highest_bitrate([first, second])
 
 
+def find_list_to_delete():
+    pass
+
+
 def find_extra_tracks(starting_path=".", tail="*.m4a"):
     matches = find_matches_by_partial_name(starting_path, tail)
 

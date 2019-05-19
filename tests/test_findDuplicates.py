@@ -87,5 +87,6 @@ def test_best_track(test_tracks):
     assert best_track(test_tracks["equal"].longer, "Not A File") == NotImplemented
 
 
-def test_find_list_to_delete():
-    pass
+def test_find_list_to_delete(test_tracks):
+    assert find_list_to_delete() == [test_tracks["better_worse"].worse,
+                                     test_tracks["equal"].longer]
