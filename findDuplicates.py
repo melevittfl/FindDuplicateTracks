@@ -37,7 +37,7 @@ class MusicFile(object):
         return str(self.path.resolve())
 
     def __eq__(self, other):
-        '''Files are equal is they have the same size and bitrate'''
+        """Files are equal if they have the same size and bitrate"""
         if isinstance(other, MusicFile):
             return (self.bitrate == other.bitrate) and (self.size == other.size)
         else:
