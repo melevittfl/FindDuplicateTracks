@@ -15,6 +15,7 @@ def music_file():
 def test_tracks():
     best_file = Path("resources/amazing_track.m4a")
     worst_file = Path("resources/amazing_track 1.m4a")
+    short_low_bitrate = Path("resources/128bits.m4a")
 
     first_equal = Path("resources/Equal 1.m4a")
     second_equal = Path("resources/Equal.m4a")
@@ -23,4 +24,5 @@ def test_tracks():
     Equal = namedtuple('Equal', ['longer', 'shorter'])
 
     return {"better_worse": BetterWorse(MusicFile(best_file), MusicFile(worst_file)),
-            "equal": Equal(MusicFile(first_equal), MusicFile(second_equal))}
+            "equal": Equal(MusicFile(first_equal), MusicFile(second_equal)),
+            "short128bit": MusicFile(short_low_bitrate)}
