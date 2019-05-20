@@ -46,8 +46,10 @@ def test_best_track(test_tracks):
     # Comparing the None with the second file should return the second file
     assert best_track(None, test_tracks["equal"].shorter) == test_tracks["equal"].shorter
 
-    # Comparing a MusicFile with a non MusicFile should return NotImplimented
-    assert best_track(test_tracks["equal"].longer, "Not A File") == NotImplemented
+
+    # Comparing a MusicFile with a non MusicFile should return TypeError
+    with pytest.raises(TypeError):
+        best_track(test_tracks["equal"].longer, "Not A File")
 
 
 def test_find_list_to_delete(test_tracks):

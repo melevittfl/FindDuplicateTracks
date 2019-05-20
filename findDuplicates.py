@@ -48,9 +48,7 @@ def best_track(first_file: MusicFile = None, second_file: MusicFile = None) -> M
     """
     return first_file if not second_file \
         else second_file if not first_file \
-        else NotImplemented if not (isinstance(first_file, MusicFile) and isinstance(second_file, MusicFile)) \
-        else shortest_name([first_file, second_file]) if first_file == second_file \
-        else highest_bitrate([first_file, second_file])
+        else first_file if first_file > second_file else second_file
 
 
 
