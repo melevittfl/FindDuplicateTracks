@@ -1,6 +1,5 @@
 import pytest
-from collections import namedtuple
-
+import shutil
 from findDuplicates import *
 
 
@@ -55,7 +54,6 @@ def test_evaluate_tracks_at_path(test_tracks):
     assert set(result["keep"]) == set(tracks_to_keep)
 
 
-
 def test_generate_delete_list(test_tracks):
     complete = [test_tracks["better_worse"].better,
                 test_tracks["better_worse"].worse,
@@ -71,3 +69,29 @@ def test_generate_delete_list(test_tracks):
     should_be_empty = result.intersection(tracks_to_keep)
 
     assert len(should_be_empty) == 0
+
+
+def test_delete_tracks(tmpdir):
+    delete_list = []
+    keep_list = []
+    for i in range(0, 6):
+        path = Path(tmpdir / f"test_file{i:03d}.tmp")
+        shutil.copy("resources/128bits.m4a", path)
+        if i % 2:
+            delete_list.append(MusicFile(path))
+        else:
+            keep_list.append(path)
+
+    temp_dir = Path(tmpdir)
+    delete_list_paths = [Path(p.full_path_name) for p in delete_list]
+    all_the_tracks = delete_list_paths + keep_list
+
+    delete_tracks(delete_list, actually_delete=False)
+    remaining_tracks = temp_dir.glob("*.tmp")
+    assert set(all_the_tracks) == set(remaining_tracks)
+
+    delete_tracks(delete_list, actually_delete=True)
+
+    remaining_tracks = temp_dir.glob("*.tmp")
+    assert set(keep_list) == set(remaining_tracks)
+    assert len(set(delete_list_paths).intersection(remaining_tracks)) == 0

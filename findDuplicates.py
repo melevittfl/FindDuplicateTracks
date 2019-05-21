@@ -3,13 +3,21 @@ from pathlib import Path
 import sys
 from collections import defaultdict
 
-actually_delete = False
-
 
 def all_files(starting_path=".", pattern="*"):
     for path in Path(starting_path).rglob(pattern):
         if path.is_file() and not path.name.startswith("._"):
             yield MusicFile(path)
+
+
+def delete_tracks(tracks, actually_delete=False):
+    for track in tracks:
+        print(f"Deleting {track}...", end="")
+        if actually_delete:
+            track.path.unlink()
+            print("Deleted")
+        else:
+            print("Test mode. Track not deleted")
 
 
 def best_track(first_file: MusicFile = None, second_file: MusicFile = None) -> MusicFile:
