@@ -70,11 +70,11 @@ def test_delete_tracks(tmpdir):
     delete_list_paths = [Path(p.full_path_name) for p in delete_list]
     all_the_tracks = delete_list_paths + keep_list
 
-    delete_tracks(delete_list, actually_delete=False)
+    delete_tracks(delete_list, delete=False)
     remaining_tracks = temp_dir.glob("*.tmp")
     assert set(all_the_tracks) == set(remaining_tracks)
 
-    delete_tracks(delete_list, actually_delete=True)
+    delete_tracks(delete_list, delete=True)
 
     remaining_tracks = temp_dir.glob("*.tmp")
     assert set(keep_list) == set(remaining_tracks)
@@ -97,11 +97,11 @@ def test_delete_duplicate_music_files(test_tree):
     complete = [n.name for n in complete]
     keep = [n.name for n in tracks_to_keep]
 
-    delete_duplicate_music_files(temp_dir_string, actually_delete=False)
+    delete_duplicate_music_files(temp_dir_string, delete=False)
     remaining_tracks = [n.name for n in Path(temp_dir.strpath).glob("*.m4a")]
     assert set(complete) == set(remaining_tracks)
 
-    delete_duplicate_music_files(temp_dir_string, actually_delete=True)
+    delete_duplicate_music_files(temp_dir_string, delete=True)
     remaining_tracks = [n.name for n in Path(temp_dir.strpath).glob("*.m4a")]
     assert set(remaining_tracks) == set(keep)
 

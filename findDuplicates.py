@@ -11,10 +11,10 @@ def all_files(starting_path=".", pattern="*"):
             yield MusicFile(path)
 
 
-def delete_tracks(tracks, actually_delete=False):
+def delete_tracks(tracks, delete=False):
     for track in tracks:
         print(f"Deleting {track}...", end="")
-        if actually_delete:
+        if delete:
             track.path.unlink()
             print("Deleted")
         else:
@@ -49,15 +49,14 @@ def find_tracks_to_delete_at_path(starting_path: str =".", tail: str ="*.m4a") -
     return tracks_to_delete
 
 
-def delete_duplicate_music_files(starting_path=".", type="*.m4a", actually_delete=False):
-    delete_tracks(find_tracks_to_delete_at_path(starting_path, type), actually_delete)
+def delete_duplicate_music_files(starting_path=".", type="*.m4a", delete=False):
+    delete_tracks(find_tracks_to_delete_at_path(starting_path, type), delete)
 
 
 if __name__ == '__main__':
+    actually_delete=False
 
-    #find_extra_tracks(sys.argv[1])
-
-    delete_duplicate_music_files(sys.argv[1])
+    delete_duplicate_music_files(sys.argv[1], delete=actually_delete)
 
 
 
