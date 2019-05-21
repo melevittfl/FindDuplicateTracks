@@ -22,7 +22,7 @@ def delete_tracks(tracks, actually_delete=False):
 
 
 def best_track(first_file: MusicFile = None, second_file: MusicFile = None) -> Tuple[
-    Optional[MusicFile], Optional[MusicFile]]:
+                Optional[MusicFile], Optional[MusicFile]]:
     """
     Compare two MusicFiles and return the one that is present if the is only one,
     lexically the shortest name (if the two files have the same size and bitrate),
