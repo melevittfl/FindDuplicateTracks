@@ -48,3 +48,6 @@ class MusicFile(object):
                             and len(self.name) < len(other.name)) else False
         else:
             return NotImplemented
+
+    def __hash__(self):
+        return hash((self.bitrate, self.size))

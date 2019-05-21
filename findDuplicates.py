@@ -1,6 +1,7 @@
 from musicfile import MusicFile
 from pathlib import Path
 import sys
+from collections import defaultdict
 
 actually_delete = False
 
@@ -51,9 +52,28 @@ def best_track(first_file: MusicFile = None, second_file: MusicFile = None) -> M
         else first_file if first_file > second_file else second_file
 
 
+def generate_delete_list(complete, tracks_to_keep):
+    return set(complete).difference(set(tracks_to_keep))
 
-def find_list_to_delete():
-    pass
+
+
+def evaluate_tracks_at_path(starting_path=".", tail="*.m4a"):
+    print(f"Evaluating starting path: {starting_path}")
+
+    tracks_to_keep = defaultdict(lambda: None)
+    all_tracks = []
+
+    for file in all_files(starting_path, tail):
+        print(f"Checking: {file.name}")
+        common_name = file.full_path_name.rstrip(' 1.m4a')
+        tracks_to_keep[common_name] = best_track(tracks_to_keep[common_name], file)
+        all_tracks.append(file)
+
+    return {"keep": [v for v in tracks_to_keep.values()], "all": all_tracks}
+
+
+
+
 
 
 def find_extra_tracks(starting_path=".", tail="*.m4a"):
@@ -82,7 +102,11 @@ def find_extra_tracks(starting_path=".", tail="*.m4a"):
 
 
 if __name__ == '__main__':
-    find_extra_tracks(sys.argv[1])
+    pass
+    #find_extra_tracks(sys.argv[1])
+
+    #print(find_list_to_delete())
+
 
 
 

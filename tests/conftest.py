@@ -4,6 +4,7 @@ from collections import namedtuple
 
 from musicfile import MusicFile
 
+
 @pytest.fixture
 def music_file():
     best_file = Path("resources/amazing_track.m4a")
