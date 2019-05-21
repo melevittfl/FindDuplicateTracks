@@ -54,7 +54,7 @@ def delete_duplicate_music_files(starting_path=".", type="*.m4a", delete=False):
 
 
 if __name__ == '__main__':
-    actually_delete=False
+    actually_delete = False
 
     delete_duplicate_music_files(sys.argv[1], delete=actually_delete)
 

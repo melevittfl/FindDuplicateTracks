@@ -18,7 +18,7 @@ size and bitrate files, just with slightly different names. In that case, the on
 
 Out of the box, the utity won't actually delete any files. 
 
-To actually delete change line 5 to True:
+To actually delete change line 57 to True:
 `actually_delete=True`
 
 ## Dependencies
