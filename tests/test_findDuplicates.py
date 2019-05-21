@@ -95,3 +95,33 @@ def test_delete_tracks(tmpdir):
     remaining_tracks = temp_dir.glob("*.tmp")
     assert set(keep_list) == set(remaining_tracks)
     assert len(set(delete_list_paths).intersection(remaining_tracks)) == 0
+
+
+def test_delete_duplicate_music_files(test_tree):
+    complete = [test_tree["best"],
+                test_tree["worst"],
+                test_tree["equal"],
+                test_tree["equal1"],
+                test_tree["short"]]
+
+    tracks_to_keep = [test_tree["best"],
+                      test_tree["equal"],
+                      test_tree["short"]]
+
+    temp_dir = test_tree["path"]
+    temp_dir_string = temp_dir.strpath
+    complete = [n.name for n in complete]
+    keep = [n.name for n in tracks_to_keep]
+
+    delete_duplicate_music_files(temp_dir_string, actually_delete=False)
+    remaining_tracks = [n.name for n in Path(temp_dir.strpath).glob("*.m4a")]
+    assert set(complete) == set(remaining_tracks)
+
+    delete_duplicate_music_files(temp_dir_string, actually_delete=True)
+    remaining_tracks = [n.name for n in Path(temp_dir.strpath).glob("*.m4a")]
+    assert set(remaining_tracks) == set(keep)
+
+
+    
+
+

@@ -32,7 +32,9 @@ def best_track(first_file: MusicFile = None, second_file: MusicFile = None) -> M
 
 
 def generate_delete_list(complete, tracks_to_keep):
-    return set(complete).difference(set(tracks_to_keep))
+    the_list = set(complete).difference(set(tracks_to_keep))
+
+    return the_list
 
 
 def evaluate_tracks_at_path(starting_path=".", tail="*.m4a"):
@@ -48,6 +50,12 @@ def evaluate_tracks_at_path(starting_path=".", tail="*.m4a"):
         all_tracks.append(file)
 
     return {"keep": [v for v in tracks_to_keep.values()], "all": all_tracks}
+
+
+def delete_duplicate_music_files(starting_path=".", type="*.m4a", actually_delete=False):
+    tracks = evaluate_tracks_at_path(starting_path, type)
+    delete_tracks(generate_delete_list(complete=tracks["all"], tracks_to_keep=tracks["keep"]),
+                  actually_delete)
 
 
 if __name__ == '__main__':
