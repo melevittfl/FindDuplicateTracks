@@ -1,10 +1,8 @@
 from musicfile import MusicFile
 from pathlib import Path
 import sys
-
-actually_delete = False
-
-
+from collections import defaultdict
+from typing import Tuple, Optional
 
 
 def all_files(starting_path=".", pattern="*"):
@@ -13,78 +11,53 @@ def all_files(starting_path=".", pattern="*"):
             yield MusicFile(path)
 
 
-def find_matches_by_partial_name(starting_path=".",tail="*.m4a"):
-    partial_name_matches = {}
-    for file in all_files(starting_path, tail):
-        partial_name = file.full_path_name.rstrip(' 1.m4a')
-
-        duplicate = partial_name_matches.get(partial_name)
-
-        if not duplicate:
-            partial_name_matches[partial_name] = []
-
-        partial_name_matches[partial_name].append(file)
-
-    return partial_name_matches
+def delete_tracks(tracks, delete=False):
+    for track in tracks:
+        print(f"Deleting {track}...", end="")
+        if delete:
+            track.path.unlink()
+            print("Deleted")
+        else:
+            print("Test mode. Track not deleted")
 
 
-def highest_bitrate(track_list):
-    return sorted(track_list, key=lambda x: x.bitrate, reverse=True)[0]
-
-
-def largest_size(track_list):
-    return sorted(track_list, key=lambda x: x.size, reverse=True)[0]
-
-
-def shortest_name(track_list):
-    return sorted(track_list, key=lambda x: len(x.path.name), reverse=True)[0]
-
-
-def best_track(first_file: MusicFile = None, second_file: MusicFile = None) -> MusicFile:
+def best_track(first_file: MusicFile = None, second_file: MusicFile = None) -> Tuple[
+                Optional[MusicFile], Optional[MusicFile]]:
     """
     Compare two MusicFiles and return the one that is present if the is only one,
     lexically the shortest name (if the two files have the same size and bitrate),
     or the one with the highest bitrate)
     """
-    return first_file if not second_file \
-        else second_file if not first_file \
-        else NotImplemented if not (isinstance(first_file, MusicFile) and isinstance(second_file, MusicFile)) \
-        else shortest_name([first_file, second_file]) if first_file == second_file \
-        else highest_bitrate([first_file, second_file])
+    return (first_file, second_file) if not second_file \
+        else (second_file, first_file) if not first_file \
+        else (first_file, second_file) if first_file > second_file else (second_file, first_file)
 
 
+def find_tracks_to_delete_at_path(starting_path: str =".", tail: str ="*.m4a") -> list:
+    print(f"Evaluating starting path: {starting_path}")
 
-def find_list_to_delete():
-    pass
+    tracks_to_keep = defaultdict(lambda: None)
+    tracks_to_delete = []
+
+    for file in all_files(starting_path, tail):
+        print(f"Checking: {file.name}")
+        common_name = file.full_path_name.rstrip(' 1.m4a')
+        tracks_to_keep[common_name], delete = best_track(tracks_to_keep[common_name], file)
+        if delete is not None:
+            tracks_to_delete.append(delete)
+
+    return tracks_to_delete
 
 
-def find_extra_tracks(starting_path=".", tail="*.m4a"):
-    matches = find_matches_by_partial_name(starting_path, tail)
-
-    for __, tracks in matches.items():
-        if len(tracks) > 1:
-            print(tracks[0].album)
-            for track in tracks:
-                print(f"{track} - VBR: {track.bitrate} Size: {track.size}")
-
-            if all(track == tracks[0] for track in tracks):
-                print("Tracks are equal, will keep the shortest named one")
-                tracks.remove(shortest_name(tracks))
-            else:
-                print("Tracks are not the same, will keep the one with the highest bitrate")
-                tracks.remove(highest_bitrate(tracks))
-
-            for track in tracks:
-                print(f"Deleting {track}...", end="")
-                if actually_delete:
-                    track.path.unlink()
-                    print("Deleted")
-                else:
-                    print("Test mode. Track not deleted")
+def delete_duplicate_music_files(starting_path=".", type="*.m4a", delete=False):
+    delete_tracks(find_tracks_to_delete_at_path(starting_path, type), delete)
 
 
 if __name__ == '__main__':
-    find_extra_tracks(sys.argv[1])
+    actually_delete = False
+
+    delete_duplicate_music_files(sys.argv[1], delete=actually_delete)
+
 
 
 
