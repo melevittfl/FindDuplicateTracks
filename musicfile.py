@@ -50,4 +50,4 @@ class MusicFile(object):
             return NotImplemented
 
     def __hash__(self):
-        return hash((self.bitrate, self.full_path_name))
+        return hash((self.size, self.full_path_name))
