@@ -4,19 +4,10 @@ from collections import namedtuple
 from findDuplicates import *
 
 
-
 def test_all_files():
     expected = list(Path(".").rglob(".py"))
     actual = list(all_files(".", ".py"))
     assert expected == actual
-
-
-def test_highest_bitrate(test_tracks):
-    assert highest_bitrate(test_tracks["better_worse"]) == test_tracks["better_worse"].better
-
-
-def test_largest_size(test_tracks):
-    assert largest_size(test_tracks["better_worse"]) == test_tracks["better_worse"].better
 
 
 def test_files_are_equal(test_tracks):
@@ -25,10 +16,6 @@ def test_files_are_equal(test_tracks):
 
 def test_files_are_not_equal(test_tracks):
     assert test_tracks["equal"].longer != test_tracks["better_worse"].worse
-
-
-def test_shortest_name(test_tracks):
-    assert shortest_name(test_tracks["equal"]) == test_tracks["equal"].shorter
 
 
 def test_best_track(test_tracks):
