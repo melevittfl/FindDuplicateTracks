@@ -1,5 +1,6 @@
 import pytest
 import shutil
+import pathlib
 from findDuplicates import *
 
 
@@ -106,6 +107,17 @@ def test_delete_duplicate_music_files(test_tree):
     assert set(remaining_tracks) == set(keep)
 
 
-    
+def test_get_tree_size(tmpdir):
+    total_count = 0
 
+    for p in range(0, 5):
+        d = Path(tmpdir / f"test_dir{p:03d}")
+        d.mkdir()
+        for i in range(0, 20):
+            f = Path(d / f"test_file{i:03d}.tmp")
+
+            f.touch()
+            total_count += 1
+
+    assert get_tree_size(tmpdir, "*") == total_count
 
