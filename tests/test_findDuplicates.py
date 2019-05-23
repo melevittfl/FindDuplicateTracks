@@ -81,6 +81,9 @@ def test_delete_tracks(tmpdir):
     assert set(keep_list) == set(remaining_tracks)
     assert len(set(delete_list_paths).intersection(remaining_tracks)) == 0
 
+    # assert no runtime excpetion occurs
+    delete_tracks([], delete=False)
+
 
 def test_delete_duplicate_music_files(test_tree):
     complete = [test_tree["best"],

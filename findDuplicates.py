@@ -45,24 +45,29 @@ def all_files(starting_path=".", file_type="*"):
 
 
 def delete_tracks(tracks, delete=False):
+
     if delete:
         message = f"Deleting {len(tracks)} files"
     else:
         message = "Test mode - skipping delete"
-    with tqdm(desc=message, total=len(tracks),
-              bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}") as pbar:
-        for track in tqdm(tracks):
-            if VERBOSE > 0:
-                tqdm.write(f"Deleting {track}...", end="")
-            if delete:
-                track.path.unlink()
+
+    if not tracks:
+        print("No tracks to delete")
+    else:
+        with tqdm(desc=message, total=len(tracks),
+                  bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}") as pbar:
+            for track in tqdm(tracks):
                 if VERBOSE > 0:
-                    tqdm.write("Deleted")
-            else:
-                if VERBOSE > 0:
-                    tqdm.write("Test mode. Track not deleted")
-                pass
-            pbar.update(1)
+                    tqdm.write(f"Deleting {track}...", end="")
+                if delete:
+                    track.path.unlink()
+                    if VERBOSE > 0:
+                        tqdm.write("Deleted")
+                else:
+                    if VERBOSE > 0:
+                        tqdm.write("Test mode. Track not deleted")
+                    pass
+                pbar.update(1)
 
 
 def best_track(first_file: MusicFile = None, second_file: MusicFile = None) -> Tuple[
@@ -89,7 +94,7 @@ def find_tracks_to_delete_at_path(starting_path: str = ".", file_type: str = "m4
         for file in all_files(starting_path, file_type):
             if VERBOSE > 1:
                 tqdm.write(f"Checking: {file.name}")
-            common_name = file.full_path_name.rstrip(' 1.m4a')
+            common_name = file.full_path_name.rstrip(f' 1.{file_type}')
             tracks_to_keep[common_name], delete = best_track(tracks_to_keep[common_name], file)
             if delete is not None:
                 tracks_to_delete.append(delete)
