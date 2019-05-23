@@ -14,12 +14,23 @@ size and bitrate files, just with slightly different names. In that case, the on
 
 ## Usage
 
-<pre>python3 findDuplicates.py <i>/path/to/music/tracks</i></pre>
+<pre>
+usage: findDuplicates.py [-h] [-t {mp3,ogg,opus,mp4,m4a,flac,wma,wav}]
+                         [--reallydelete] [-v]
+                         path
 
-Out of the box, the utity won't actually delete any files. 
+Find music files that iTunes has duplicated. (c) Mark Levitt 2019
 
-To actually delete change line 57 to True:
-`actually_delete=True`
+positional arguments:
+  path                  The path to the root of your Music files
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -t {mp3,ogg,opus,mp4,m4a,flac,wma,wav}, --type {mp3,ogg,opus,mp4,m4a,flac,wma,wav}
+                        Files extension to scan. Defaults to 'm4a'
+  --reallydelete        Actually delete the duplicate files on disk
+  -v, --verbose         Increase output verbosity
+</pre
 
 ## Dependencies
 

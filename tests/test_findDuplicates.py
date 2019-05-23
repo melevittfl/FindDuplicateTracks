@@ -81,6 +81,9 @@ def test_delete_tracks(tmpdir):
     assert set(keep_list) == set(remaining_tracks)
     assert len(set(delete_list_paths).intersection(remaining_tracks)) == 0
 
+    # assert no runtime excpetion occurs
+    delete_tracks([], delete=False)
+
 
 def test_delete_duplicate_music_files(test_tree):
     complete = [test_tree["best"],
@@ -98,11 +101,11 @@ def test_delete_duplicate_music_files(test_tree):
     complete = [n.name for n in complete]
     keep = [n.name for n in tracks_to_keep]
 
-    delete_duplicate_music_files(temp_dir_string, delete=False)
+    delete_duplicate_music_files(temp_dir_string, do_delete=False)
     remaining_tracks = [n.name for n in Path(temp_dir.strpath).glob("*.m4a")]
     assert set(complete) == set(remaining_tracks)
 
-    delete_duplicate_music_files(temp_dir_string, delete=True)
+    delete_duplicate_music_files(temp_dir_string, do_delete=True)
     remaining_tracks = [n.name for n in Path(temp_dir.strpath).glob("*.m4a")]
     assert set(remaining_tracks) == set(keep)
 
@@ -121,3 +124,23 @@ def test_get_tree_size(tmpdir):
 
     assert get_tree_size(tmpdir, "*") == total_count
 
+
+def test_parse_args():
+    parsed = cli_parser(['/Some/Path', '--reallydelete', '-vv', '-t', 'm4a'])
+    assert parsed.path == '/Some/Path'
+    assert parsed.reallydelete
+    assert parsed.verbose == 2
+    assert parsed.type == 'm4a'
+
+    parsed = cli_parser(['/Some/Path'])
+    assert not parsed.reallydelete
+
+    with pytest.raises(SystemExit):
+        parser = cli_parser([])
+
+    with pytest.raises(SystemExit):
+        parser = cli_parser(['-t doc'])
+
+
+def test_search_pattern():
+    assert search_pattern('m4a') == '*.m4a'
