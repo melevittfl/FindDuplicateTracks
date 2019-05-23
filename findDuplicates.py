@@ -44,9 +44,9 @@ def all_files(starting_path=".", file_type="*"):
             yield MusicFile(path)
 
 
-def delete_tracks(tracks, delete=False):
+def delete_tracks(tracks, delete_the_files=False):
 
-    if delete:
+    if delete_the_files:
         message = f"Deleting {len(tracks)} files"
     else:
         message = "Test mode - skipping delete"
@@ -59,7 +59,7 @@ def delete_tracks(tracks, delete=False):
             for track in tqdm(tracks):
                 if VERBOSE > 0:
                     tqdm.write(f"Deleting {track}...", end="")
-                if delete:
+                if delete_the_files:
                     track.path.unlink()
                     if VERBOSE > 0:
                         tqdm.write("Deleted")
@@ -95,9 +95,9 @@ def find_tracks_to_delete_at_path(starting_path: str = ".", file_type: str = "m4
             if VERBOSE > 1:
                 tqdm.write(f"Checking: {file.name}")
             common_name = file.full_path_name.rstrip(f' 1.{file_type}')
-            tracks_to_keep[common_name], delete = best_track(tracks_to_keep[common_name], file)
-            if delete is not None:
-                tracks_to_delete.append(delete)
+            tracks_to_keep[common_name], delete_candidate = best_track(tracks_to_keep[common_name], file)
+            if delete_candidate is not None:
+                tracks_to_delete.append(delete_candidate)
             pbar.update(1)
     print(f"Done. Found {len(tracks_to_delete)} duplicate tracks")
 

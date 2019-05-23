@@ -71,18 +71,18 @@ def test_delete_tracks(tmpdir):
     delete_list_paths = [Path(p.full_path_name) for p in delete_list]
     all_the_tracks = delete_list_paths + keep_list
 
-    delete_tracks(delete_list, delete=False)
+    delete_tracks(delete_list, delete_the_files=False)
     remaining_tracks = temp_dir.glob("*.tmp")
     assert set(all_the_tracks) == set(remaining_tracks)
 
-    delete_tracks(delete_list, delete=True)
+    delete_tracks(delete_list, delete_the_files=True)
 
     remaining_tracks = temp_dir.glob("*.tmp")
     assert set(keep_list) == set(remaining_tracks)
     assert len(set(delete_list_paths).intersection(remaining_tracks)) == 0
 
     # assert no runtime excpetion occurs
-    delete_tracks([], delete=False)
+    delete_tracks([], delete_the_files=False)
 
 
 def test_delete_duplicate_music_files(test_tree):
