@@ -4,6 +4,7 @@ import sys
 from collections import defaultdict
 from typing import Tuple, Optional
 from tqdm import tqdm
+import time
 
 verbose = 1
 
@@ -31,7 +32,7 @@ def delete_tracks(tracks, delete=False):
     if delete:
         message = f"Deleting {len(tracks)} files"
     else:
-        message = "Test mode"
+        message = "Test mode - skipping delete"
     with tqdm(desc=message, total=len(tracks),
               bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}") as pbar:
         for track in tqdm(tracks):
@@ -61,13 +62,14 @@ def best_track(first_file: MusicFile = None, second_file: MusicFile = None) -> T
 
 
 def find_tracks_to_delete_at_path(starting_path: str =".", tail: str ="*.m4a") -> list:
-    print(f"Evaluating starting path: {starting_path}")
+    print(f"Examining directory: {starting_path}")
 
     tracks_to_keep = defaultdict(lambda: None)
     tracks_to_delete = []
 
-    with tqdm(desc="Finding duplicates ", total=get_tree_size(starting_path, tail),
-              bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}") as pbar:
+    with tqdm(desc="Finding duplicates", total=get_tree_size(starting_path, tail),
+              bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}",
+              unit="files") as pbar:
         for file in all_files(starting_path, tail):
             if verbose > 1:
                 tqdm.write(f"Checking: {file.name}")
