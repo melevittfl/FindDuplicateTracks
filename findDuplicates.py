@@ -5,6 +5,7 @@ from collections import defaultdict
 from typing import Tuple, Optional
 from tqdm import tqdm
 import argparse
+import re
 
 
 VERBOSE = 1
@@ -22,6 +23,16 @@ def cli_parser(commnad_line):
 
 def search_pattern(file_type):
     return '*.' + file_type
+
+
+def make_common_name(file, file_type):
+    """
+    Give a MusicFile, return the full path name minus the extension and any extra sequence characters
+    For example. /some/path/file.m4a, /some/path/file 1.m4a, and /some/path/file 2.m4a should all return
+    /some/path/file
+    """
+    pattern = re.compile(f'( [\\d]|).{file_type}$')
+    return pattern.sub('', file.full_path_name)
 
 
 def get_tree_size(starting_path, file_type):
@@ -94,7 +105,7 @@ def find_tracks_to_delete_at_path(starting_path: str = ".", file_type: str = "m4
         for file in all_files(starting_path, file_type):
             if VERBOSE > 1:
                 tqdm.write(f"Checking: {file.name}")
-            common_name = file.full_path_name.rstrip(f' 1.{file_type}')
+            common_name = make_common_name(file, file_type)
             tracks_to_keep[common_name], delete_candidate = best_track(tracks_to_keep[common_name], file)
             if delete_candidate is not None:
                 tracks_to_delete.append(delete_candidate)

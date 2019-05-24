@@ -44,7 +44,8 @@ def test_find_tracks_to_delete_at_path(test_tracks):
                 test_tracks["better_worse"].worse,
                 test_tracks["equal"].shorter,
                 test_tracks["equal"].longer,
-                test_tracks["short128bit"]]
+                test_tracks["short128bit"],
+                test_tracks["worst2"]]
 
     tracks_to_keep = [test_tracks["better_worse"].better,
                       test_tracks["equal"].shorter,
@@ -90,7 +91,8 @@ def test_delete_duplicate_music_files(test_tree):
                 test_tree["worst"],
                 test_tree["equal"],
                 test_tree["equal1"],
-                test_tree["short"]]
+                test_tree["short"],
+                test_tree["worst2"]]
 
     tracks_to_keep = [test_tree["best"],
                       test_tree["equal"],
@@ -144,3 +146,13 @@ def test_parse_args():
 
 def test_search_pattern():
     assert search_pattern('m4a') == '*.m4a'
+
+
+def test_make_common_name(test_tracks):
+    c_name1 = test_tracks["better_worse"].better.full_path_name.rstrip('.m4a')
+    result1 = make_common_name(test_tracks["better_worse"].better, 'm4a')
+    assert result1 == c_name1
+
+    c_name2 = test_tracks["better_worse"].worse.full_path_name.rstrip(' 1.m4a')
+    result2 = make_common_name(test_tracks["better_worse"].worse, 'm4a')
+    assert result2 == c_name2
