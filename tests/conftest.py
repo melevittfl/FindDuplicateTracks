@@ -16,6 +16,7 @@ def music_file():
 def test_tracks():
     best_file = Path("resources/amazing_track.m4a")
     worst_file = Path("resources/amazing_track 1.m4a")
+    another_worst = Path("resources/amazing_track 2.m4a")
     short_low_bitrate = Path("resources/128bits.m4a")
 
     first_equal = Path("resources/Equal 1.m4a")
@@ -26,13 +27,15 @@ def test_tracks():
 
     return {"better_worse": BetterWorse(MusicFile(best_file), MusicFile(worst_file)),
             "equal": Equal(MusicFile(first_equal), MusicFile(second_equal)),
-            "short128bit": MusicFile(short_low_bitrate)}
+            "short128bit": MusicFile(short_low_bitrate),
+            "worst2": MusicFile(another_worst)}
 
 
 @pytest.fixture(scope="session")
 def test_tree(tmpdir_factory):
     best_file = Path("resources/amazing_track.m4a")
     worst_file = Path("resources/amazing_track 1.m4a")
+    another_worst = Path("resources/amazing_track 2.m4a")
     short_low_bitrate = Path("resources/128bits.m4a")
 
     first_equal = Path("resources/Equal 1.m4a")
@@ -48,4 +51,5 @@ def test_tree(tmpdir_factory):
             "short": short_low_bitrate,
             "equal1": first_equal,
             "equal": second_equal,
+            "worst2": another_worst,
             "path": tmpdir}
