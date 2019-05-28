@@ -11,14 +11,14 @@ import re
 VERBOSE = 1
 
 
-def cli_parser(commnad_line):
+def cli_parser(commnand_line):
     parser = argparse.ArgumentParser(description="Find music files that iTunes has duplicated. (c) Mark Levitt 2019")
     parser.add_argument('path', help="The path to the root of your Music files")
     parser.add_argument('-t', '--type', default="m4a", help="Files extension to scan. Defaults to 'm4a'",
                         choices=['mp3', 'ogg', 'opus', 'mp4', 'm4a', 'flac', 'wma', 'wav'])
     parser.add_argument('--reallydelete', action="store_true", help="Actually delete the duplicate files on disk")
     parser.add_argument('-v', '--verbose', action="count", help="Increase output verbosity")
-    return parser.parse_args(commnad_line)
+    return parser.parse_args(commnand_line)
 
 
 def search_pattern(file_type):
@@ -66,7 +66,8 @@ def delete_tracks(tracks, delete_the_files=False):
         print("No tracks to delete")
     else:
         with tqdm(desc=message, total=len(tracks),
-                  bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}") as pbar:
+                  bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}",
+                  unit="files") as pbar:
             for track in tqdm(tracks):
                 if VERBOSE > 0:
                     tqdm.write(f"Deleting {track}...", end="")
@@ -81,8 +82,7 @@ def delete_tracks(tracks, delete_the_files=False):
                 pbar.update(1)
 
 
-def best_track(first_file: MusicFile = None, second_file: MusicFile = None) -> Tuple[
-                Optional[MusicFile], Optional[MusicFile]]:
+def best_track(first_file=None, second_file=None):
     """
     Compare two MusicFiles and return the one that is present if the is only one,
     lexically the shortest name (if the two files have the same size and bitrate),
@@ -93,7 +93,7 @@ def best_track(first_file: MusicFile = None, second_file: MusicFile = None) -> T
         else (first_file, second_file) if first_file > second_file else (second_file, first_file)
 
 
-def find_tracks_to_delete_at_path(starting_path: str = ".", file_type: str = "m4a") -> list:
+def find_tracks_to_delete_at_path(starting_path=".", file_type="m4a"):
     print(f"Examining directory: {starting_path}")
 
     tracks_to_keep = defaultdict(lambda: None)
