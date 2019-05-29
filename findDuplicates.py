@@ -27,7 +27,7 @@ def search_pattern(file_type):
 
 def make_common_name(file, file_type):
     """
-    Give a MusicFile, return the full path name minus the extension and any extra sequence characters
+    Given a MusicFile, return the full path name minus the extension and any extra sequence characters
     For example. /some/path/file.m4a, /some/path/file 1.m4a, and /some/path/file 2.m4a should all return
     /some/path/file
     """
@@ -41,7 +41,7 @@ def get_tree_size(starting_path, file_type):
     total = 0
     for path in Path(starting_path).rglob(pattern):
         if path.is_file() and not path.name.startswith("._"):
-            if VERBOSE:
+            if VERBOSE > 0:
                 if total % 500 == 0:
                     sys.stdout.write(".")
                     sys.stdout.flush()
@@ -84,9 +84,9 @@ def delete_tracks(tracks, delete_the_files=False):
 
 def best_track(first_file=None, second_file=None):
     """
-    Compare two MusicFiles and return the one that is present if the is only one,
-    lexically the shortest name (if the two files have the same size and bitrate),
-    or the one with the highest bitrate)
+    Compare two MusicFiles and return a tuple of two files, the first being the one to keep, the second being the one
+    to delete. Pick the one to keep that is present if it is the only one, lexically the shortest name (if the two
+    files have the same size and bitrate), or the one with the highest bitrate)
     """
     return (first_file, second_file) if not second_file \
         else (second_file, first_file) if not first_file \
