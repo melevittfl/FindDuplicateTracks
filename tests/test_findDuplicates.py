@@ -10,14 +10,6 @@ def test_all_files():
     assert expected == actual
 
 
-def test_files_are_equal(test_tracks):
-    assert test_tracks["equal"].longer == test_tracks["equal"].shorter
-
-
-def test_files_are_not_equal(test_tracks):
-    assert test_tracks["equal"].longer != test_tracks["better_worse"].worse
-
-
 def test_best_track(test_tracks):
     # Different bitrate files should return the higher one
     assert best_track(test_tracks["better_worse"].better,
