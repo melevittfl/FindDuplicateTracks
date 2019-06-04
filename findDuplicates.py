@@ -31,8 +31,7 @@ def make_common_name(file, file_type):
     For example. /some/path/file.m4a, /some/path/file 1.m4a, and /some/path/file 2.m4a should all return
     /some/path/file
     """
-    pattern = re.compile(f'( [\\d]|).{file_type}$')
-    return pattern.sub('', file.full_path_name)
+    return re.compile(f'( [\\d]|).{file_type}$').sub('', file.full_path_name)
 
 
 def get_tree_size(starting_path, file_type):
@@ -56,7 +55,6 @@ def all_files(starting_path=".", file_type="*"):
 
 
 def delete_tracks(tracks, delete_the_files=False):
-
     if delete_the_files:
         message = f"Deleting {len(tracks)} files"
     else:
