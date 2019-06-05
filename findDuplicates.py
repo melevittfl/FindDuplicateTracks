@@ -100,11 +100,11 @@ def find_tracks_to_delete_at_path(starting_path=".", file_type="m4a"):
     with tqdm(desc="Finding duplicates", total=get_tree_size(starting_path, file_type),
               bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}",
               unit="files") as pbar:
-        for file in all_files(starting_path, file_type):
+        for track in all_files(starting_path, file_type):
             if VERBOSE > 1:
-                tqdm.write(f"Checking: {file.name}")
-            common_name = make_common_name(file, file_type)
-            tracks_to_keep[common_name], delete_candidate = best_track(tracks_to_keep[common_name], file)
+                tqdm.write(f"Checking: {track.name}")
+            common_name = make_common_name(track, file_type)
+            tracks_to_keep[common_name], delete_candidate = best_track(tracks_to_keep[common_name], track)
             if delete_candidate is not None:
                 tracks_to_delete.append(delete_candidate)
             pbar.update(1)
@@ -121,9 +121,9 @@ if __name__ == '__main__':
     parsed = cli_parser(sys.argv[1:])
     path = parsed.path
     delete = parsed.reallydelete
-    type = parsed.type
+    file_type = parsed.type
     VERBOSE = parsed.verbose
     if not VERBOSE:
         VERBOSE = 1
 
-    delete_duplicate_music_files(starting_path=path, do_delete=delete, file_type=type)
+    delete_duplicate_music_files(starting_path=path, do_delete=delete, file_type=file_type)
