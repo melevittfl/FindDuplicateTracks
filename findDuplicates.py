@@ -108,10 +108,6 @@ def find_tracks_to_delete_at_path(starting_path=".", file_type="m4a"):
     return tracks_to_delete
 
 
-def delete_duplicate_music_files(starting_path=".", file_type="m4a", do_delete=False):
-    delete_tracks(find_tracks_to_delete_at_path(starting_path=starting_path, file_type=file_type), do_delete)
-
-
 def main(cli_arguments):
     parsed = cli_parser(cli_arguments)
     path = parsed.path
@@ -122,7 +118,7 @@ def main(cli_arguments):
     if not VERBOSE:
         VERBOSE = 1
 
-    delete_duplicate_music_files(starting_path=path, do_delete=delete, file_type=f_type)
+    delete_tracks(find_tracks_to_delete_at_path(starting_path=path, file_type=f_type), delete_the_files=delete)
 
 
 if __name__ == '__main__':
