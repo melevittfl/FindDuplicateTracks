@@ -11,14 +11,14 @@ import re
 VERBOSE = 1
 
 
-def cli_parser(commnand_line):
+def cli_parser(command_line):
     parser = argparse.ArgumentParser(description="Find music files that iTunes has duplicated. (c) Mark Levitt 2019")
     parser.add_argument('path', help="The path to the root of your Music files")
     parser.add_argument('-t', '--type', default="m4a", help="Files extension to scan. Defaults to 'm4a'",
                         choices=['mp3', 'ogg', 'opus', 'mp4', 'm4a', 'flac', 'wma', 'wav'])
     parser.add_argument('--reallydelete', action="store_true", help="Actually delete the duplicate files on disk")
     parser.add_argument('-v', '--verbose', action="count", help="Increase output verbosity")
-    return parser.parse_args(commnand_line)
+    return parser.parse_args(command_line)
 
 
 def search_pattern(file_type):
@@ -121,9 +121,9 @@ if __name__ == '__main__':
     parsed = cli_parser(sys.argv[1:])
     path = parsed.path
     delete = parsed.reallydelete
-    file_type = parsed.type
+    f_type = parsed.type
     VERBOSE = parsed.verbose
     if not VERBOSE:
         VERBOSE = 1
 
-    delete_duplicate_music_files(starting_path=path, do_delete=delete, file_type=file_type)
+    delete_duplicate_music_files(starting_path=path, do_delete=delete, file_type=f_type)
