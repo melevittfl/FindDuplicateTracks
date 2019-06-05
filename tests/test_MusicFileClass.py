@@ -1,5 +1,3 @@
-import pytest
-from collections import namedtuple
 from pathlib import Path
 
 from musicfile import MusicFile

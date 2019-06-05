@@ -1,13 +1,6 @@
 import pytest
 import shutil
-import pathlib
 from findDuplicates import *
-
-
-def test_all_files():
-    expected = list(Path(".").rglob(".py"))
-    actual = list(all_files(".", ".py"))
-    assert expected == actual
 
 
 def test_best_track(test_tracks):
@@ -78,7 +71,7 @@ def test_delete_tracks(tmpdir):
     delete_tracks([], delete_the_files=False)
 
 
-def test_delete_duplicate_music_files(test_tree):
+def test_main(test_tree):
     complete = [test_tree["best"],
                 test_tree["worst"],
                 test_tree["equal"],
@@ -94,19 +87,19 @@ def test_delete_duplicate_music_files(test_tree):
     temp_dir_string = temp_dir.strpath
     complete = [n.name for n in complete]
     keep = [n.name for n in tracks_to_keep]
-
-    delete_duplicate_music_files(temp_dir_string, do_delete=False)
+    cli_args = [temp_dir_string]
+    main(cli_args)
     remaining_tracks = [n.name for n in Path(temp_dir.strpath).glob("*.m4a")]
     assert set(complete) == set(remaining_tracks)
 
-    delete_duplicate_music_files(temp_dir_string, do_delete=True)
+    cli_args = [temp_dir_string, "--reallydelete"]
+    main(cli_args)
     remaining_tracks = [n.name for n in Path(temp_dir.strpath).glob("*.m4a")]
     assert set(remaining_tracks) == set(keep)
 
 
-def test_get_tree_size(tmpdir):
-    total_count = 0
 
+def test_get_tree_list(tmpdir):
     for p in range(0, 5):
         d = Path(tmpdir / f"test_dir{p:03d}")
         d.mkdir()
@@ -114,9 +107,10 @@ def test_get_tree_size(tmpdir):
             f = Path(d / f"test_file{i:03d}.tmp")
 
             f.touch()
-            total_count += 1
 
-    assert get_tree_size(tmpdir, "*") == total_count
+    expected = list(Path(tmpdir).rglob(".tmp"))
+
+    assert set(get_tree_list(tmpdir, ".tmp")) == set(expected)
 
 
 def test_parse_args():
