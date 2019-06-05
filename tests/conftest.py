@@ -1,9 +1,9 @@
 import pytest
 from pathlib import Path
 from collections import namedtuple
-
 from musicfile import MusicFile
 import shutil
+
 
 @pytest.fixture
 def music_file():
