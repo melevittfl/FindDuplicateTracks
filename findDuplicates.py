@@ -2,7 +2,6 @@ from musicfile import MusicFile
 from pathlib import Path
 import sys
 from collections import defaultdict
-from typing import Tuple, Optional
 from tqdm import tqdm
 import argparse
 import re
