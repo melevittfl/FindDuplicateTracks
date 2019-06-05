@@ -34,24 +34,20 @@ def make_common_name(file, file_type):
     return re.compile(f'( [\\d]|).{file_type}$').sub('', file.full_path_name)
 
 
-def get_tree_size(starting_path, file_type):
-    """Return total number of files in given path and subdirs."""
+def get_tree_list(starting_path, file_type):
+    """Return a list of tracks for the given file type"""
     pattern = search_pattern(file_type)
     total = 0
-    for path in Path(starting_path).rglob(pattern):
-        if path.is_file() and not path.name.startswith("._"):
+    track_list = []
+    for track_path in Path(starting_path).rglob(pattern):
+        if track_path.is_file() and not track_path.name.startswith("._"):
             if VERBOSE > 0:
                 if total % 500 == 0:
                     sys.stdout.write(".")
                     sys.stdout.flush()
+            track_list.append(track_path)
             total += 1
-    return total
-
-
-def all_files(starting_path=".", file_type="*"):
-    for path in Path(starting_path).rglob(search_pattern(file_type)):
-        if path.is_file() and not path.name.startswith("._"):
-            yield MusicFile(path)
+    return track_list
 
 
 def delete_tracks(tracks, delete_the_files=False):
@@ -96,11 +92,11 @@ def find_tracks_to_delete_at_path(starting_path=".", file_type="m4a"):
 
     tracks_to_keep = defaultdict(lambda: None)
     tracks_to_delete = []
-
-    with tqdm(desc="Finding duplicates", total=get_tree_size(starting_path, file_type),
+    file_list = get_tree_list(starting_path, file_type)
+    with tqdm(desc="Finding duplicates", total=len(file_list),
               bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}",
               unit="files") as pbar:
-        for track in all_files(starting_path, file_type):
+        for track in (MusicFile(x) for x in file_list):
             if VERBOSE > 1:
                 tqdm.write(f"Checking: {track.name}")
             common_name = make_common_name(track, file_type)

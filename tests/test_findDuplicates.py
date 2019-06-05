@@ -1,13 +1,6 @@
 import pytest
 import shutil
-import pathlib
 from findDuplicates import *
-
-
-def test_all_files():
-    expected = list(Path(".").rglob(".py"))
-    actual = list(all_files(".", ".py"))
-    assert expected == actual
 
 
 def test_best_track(test_tracks):
@@ -104,9 +97,7 @@ def test_delete_duplicate_music_files(test_tree):
     assert set(remaining_tracks) == set(keep)
 
 
-def test_get_tree_size(tmpdir):
-    total_count = 0
-
+def test_get_tree_list(tmpdir):
     for p in range(0, 5):
         d = Path(tmpdir / f"test_dir{p:03d}")
         d.mkdir()
@@ -114,9 +105,10 @@ def test_get_tree_size(tmpdir):
             f = Path(d / f"test_file{i:03d}.tmp")
 
             f.touch()
-            total_count += 1
 
-    assert get_tree_size(tmpdir, "*") == total_count
+    expected = list(Path(tmpdir).rglob(".tmp"))
+
+    assert set(get_tree_list(tmpdir, ".tmp")) == set(expected)
 
 
 def test_parse_args():
