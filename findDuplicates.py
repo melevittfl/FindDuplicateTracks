@@ -7,7 +7,7 @@ import argparse
 import re
 
 
-VERBOSE = 1
+VERBOSE = 0
 
 
 def cli_parser(command_line):
@@ -18,6 +18,11 @@ def cli_parser(command_line):
     parser.add_argument('--reallydelete', action="store_true", help="Actually delete the duplicate files on disk")
     parser.add_argument('-v', '--verbose', action="count", help="Increase output verbosity")
     return parser.parse_args(command_line)
+
+
+def output(text=None, level=0, end="\n", flush=False):
+    if level <= VERBOSE:
+        print(text, end=end, flush=flush)
 
 
 def search_pattern(file_type):
@@ -40,12 +45,11 @@ def get_tree_list(starting_path, file_type):
     track_list = []
     for track_path in Path(starting_path).rglob(pattern):
         if track_path.is_file() and not track_path.name.startswith("._"):
-            if VERBOSE > 0:
-                if total % 500 == 0:
-                    sys.stdout.write(".")
-                    sys.stdout.flush()
+            if total % 500 == 0:
+                output(".", end="", flush=True)
             track_list.append(track_path)
             total += 1
+    output("Done.")
     return track_list
 
 
@@ -56,21 +60,18 @@ def delete_tracks(tracks, delete_the_files=False):
         message = "Test mode - skipping delete"
 
     if not tracks:
-        print("No tracks to delete")
+        output("No tracks to delete")
     else:
         with tqdm(desc=message, total=len(tracks),
                   bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}",
                   unit="files") as pbar:
             for track in tqdm(tracks):
-                if VERBOSE > 0:
-                    tqdm.write(f"Deleting {track}...", end="")
+                tqdm.write(f"Deleting {track}...", end="")
                 if delete_the_files:
                     track.path.unlink()
-                    if VERBOSE > 0:
-                        tqdm.write("Deleted")
+                    tqdm.write("Deleted")
                 else:
-                    if VERBOSE > 0:
-                        tqdm.write("Test mode. Track not deleted")
+                    tqdm.write("Test mode. Track not deleted")
                     pass
                 pbar.update(1)
 
@@ -87,23 +88,24 @@ def best_track(first_file=None, second_file=None):
 
 
 def find_tracks_to_delete_at_path(starting_path=".", file_type="m4a"):
-    print(f"Examining directory: {starting_path}")
+    output(f"Examining directory: {starting_path}")
 
     tracks_to_keep = defaultdict(lambda: None)
     tracks_to_delete = []
     file_list = get_tree_list(starting_path, file_type)
+    output(f"{len(file_list)} tracks found.", level=2)
     with tqdm(desc="Finding duplicates", total=len(file_list),
               bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}",
               unit="files") as pbar:
         for track in (MusicFile(x) for x in file_list):
-            if VERBOSE > 1:
+            if VERBOSE > 0:
                 tqdm.write(f"Checking: {track.name}")
             common_name = make_common_name(track, file_type)
             tracks_to_keep[common_name], delete_candidate = best_track(tracks_to_keep[common_name], track)
             if delete_candidate is not None:
                 tracks_to_delete.append(delete_candidate)
             pbar.update(1)
-    print(f"Done. Found {len(tracks_to_delete)} duplicate tracks")
+    output(f"Done. Found {len(tracks_to_delete)} duplicate tracks")
 
     return tracks_to_delete
 
@@ -116,7 +118,7 @@ def main(cli_arguments):
     global VERBOSE
     VERBOSE = parsed.verbose
     if not VERBOSE:
-        VERBOSE = 1
+        VERBOSE = 0
 
     delete_tracks(find_tracks_to_delete_at_path(starting_path=path, file_type=f_type), delete_the_files=delete)
 

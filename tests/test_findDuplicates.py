@@ -98,7 +98,6 @@ def test_main(test_tree):
     assert set(remaining_tracks) == set(keep)
 
 
-
 def test_get_tree_list(tmpdir):
     for p in range(0, 5):
         d = Path(tmpdir / f"test_dir{p:03d}")
@@ -142,3 +141,30 @@ def test_make_common_name(test_tracks):
     c_name2 = test_tracks["better_worse"].worse.full_path_name.rstrip(' 1.m4a')
     result2 = make_common_name(test_tracks["better_worse"].worse, 'm4a')
     assert result2 == c_name2
+
+
+def test_output(capsys):
+    import findDuplicates
+
+    findDuplicates.VERBOSE = 1
+    output("test")
+    captured = capsys.readouterr()
+    assert captured.out == "test\n"
+
+    output("verbose1level1", level=1)
+    captured = capsys.readouterr()
+    assert captured.out == "verbose1level1\n"
+
+    findDuplicates.VERBOSE = 2
+
+    output("verbose2level2", level=2)
+    captured = capsys.readouterr()
+    assert captured.out == "verbose2level2\n"
+
+    output("verbose2level3", level=3)
+    captured = capsys.readouterr()
+    assert captured.out == ""
+
+    output("first", end="")
+    captured = capsys.readouterr()
+    assert captured.out == "first"
