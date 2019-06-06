@@ -5,19 +5,27 @@ from findDuplicates import *
 
 def test_best_track(test_tracks):
     # Different bitrate files should return the higher one
-    assert best_track(test_tracks["better_worse"].better,
-                      test_tracks["better_worse"].worse) == (test_tracks["better_worse"].better,
-                                                             test_tracks["better_worse"].worse)
+    assert best_track(
+        test_tracks["better_worse"].better, test_tracks["better_worse"].worse
+    ) == (test_tracks["better_worse"].better, test_tracks["better_worse"].worse)
 
     # Equal size and bitrate files should return the shorter name
-    assert best_track(test_tracks["equal"].longer,
-                      test_tracks["equal"].shorter) == (test_tracks["equal"].shorter, test_tracks["equal"].longer)
+    assert best_track(test_tracks["equal"].longer, test_tracks["equal"].shorter) == (
+        test_tracks["equal"].shorter,
+        test_tracks["equal"].longer,
+    )
 
     # Comparing the first file with None should return the first file
-    assert best_track(test_tracks["equal"].shorter, None) == (test_tracks["equal"].shorter, None)
+    assert best_track(test_tracks["equal"].shorter, None) == (
+        test_tracks["equal"].shorter,
+        None,
+    )
 
     # Comparing the None with the second file should return the second file
-    assert best_track(None, test_tracks["equal"].shorter) == (test_tracks["equal"].shorter, None)
+    assert best_track(None, test_tracks["equal"].shorter) == (
+        test_tracks["equal"].shorter,
+        None,
+    )
 
     # Comparing a MusicFile with a non MusicFile should return TypeError
     with pytest.raises(TypeError):
@@ -25,16 +33,20 @@ def test_best_track(test_tracks):
 
 
 def test_find_tracks_to_delete_at_path(test_tracks):
-    complete = [test_tracks["better_worse"].better,
-                test_tracks["better_worse"].worse,
-                test_tracks["equal"].shorter,
-                test_tracks["equal"].longer,
-                test_tracks["short128bit"],
-                test_tracks["worst2"]]
+    complete = [
+        test_tracks["better_worse"].better,
+        test_tracks["better_worse"].worse,
+        test_tracks["equal"].shorter,
+        test_tracks["equal"].longer,
+        test_tracks["short128bit"],
+        test_tracks["worst2"],
+    ]
 
-    tracks_to_keep = [test_tracks["better_worse"].better,
-                      test_tracks["equal"].shorter,
-                      test_tracks["short128bit"]]
+    tracks_to_keep = [
+        test_tracks["better_worse"].better,
+        test_tracks["equal"].shorter,
+        test_tracks["short128bit"],
+    ]
 
     list_to_delete = set(complete) - set(tracks_to_keep)
     result = find_tracks_to_delete_at_path("resources")
@@ -72,16 +84,16 @@ def test_delete_tracks(tmpdir):
 
 
 def test_main(test_tree):
-    complete = [test_tree["best"],
-                test_tree["worst"],
-                test_tree["equal"],
-                test_tree["equal1"],
-                test_tree["short"],
-                test_tree["worst2"]]
+    complete = [
+        test_tree["best"],
+        test_tree["worst"],
+        test_tree["equal"],
+        test_tree["equal1"],
+        test_tree["short"],
+        test_tree["worst2"],
+    ]
 
-    tracks_to_keep = [test_tree["best"],
-                      test_tree["equal"],
-                      test_tree["short"]]
+    tracks_to_keep = [test_tree["best"], test_tree["equal"], test_tree["short"]]
 
     temp_dir = test_tree["path"]
     temp_dir_string = temp_dir.strpath
@@ -113,33 +125,33 @@ def test_get_tree_list(tmpdir):
 
 
 def test_parse_args():
-    parsed = cli_parser(['/Some/Path', '--reallydelete', '-vv', '-t', 'm4a'])
-    assert parsed.path == '/Some/Path'
+    parsed = cli_parser(["/Some/Path", "--reallydelete", "-vv", "-t", "m4a"])
+    assert parsed.path == "/Some/Path"
     assert parsed.reallydelete
     assert parsed.verbose == 2
-    assert parsed.type == 'm4a'
+    assert parsed.type == "m4a"
 
-    parsed = cli_parser(['/Some/Path'])
+    parsed = cli_parser(["/Some/Path"])
     assert not parsed.reallydelete
 
     with pytest.raises(SystemExit):
         parser = cli_parser([])
 
     with pytest.raises(SystemExit):
-        parser = cli_parser(['-t doc'])
+        parser = cli_parser(["-t doc"])
 
 
 def test_search_pattern():
-    assert search_pattern('m4a') == '*.m4a'
+    assert search_pattern("m4a") == "*.m4a"
 
 
 def test_make_common_name(test_tracks):
-    c_name1 = test_tracks["better_worse"].better.full_path_name.rstrip('.m4a')
-    result1 = make_common_name(test_tracks["better_worse"].better, 'm4a')
+    c_name1 = test_tracks["better_worse"].better.full_path_name.rstrip(".m4a")
+    result1 = make_common_name(test_tracks["better_worse"].better, "m4a")
     assert result1 == c_name1
 
-    c_name2 = test_tracks["better_worse"].worse.full_path_name.rstrip(' 1.m4a')
-    result2 = make_common_name(test_tracks["better_worse"].worse, 'm4a')
+    c_name2 = test_tracks["better_worse"].worse.full_path_name.rstrip(" 1.m4a")
+    result2 = make_common_name(test_tracks["better_worse"].worse, "m4a")
     assert result2 == c_name2
 
 

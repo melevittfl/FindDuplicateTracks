@@ -3,7 +3,6 @@ from pathlib import Path
 
 
 class MusicFile(object):
-
     def __init__(self, filename):
         self.path = Path(filename)
 
@@ -43,9 +42,16 @@ class MusicFile(object):
     def __gt__(self, other):
         """One file is greater if it has a higher bitrate or, if equal, the shorter name"""
         if isinstance(other, MusicFile):
-            return True if ((self.bitrate > other.bitrate) and (self.size > other.size)) else \
-                   True if (((self.bitrate == other.bitrate) and (self.size == other.size))
-                            and len(self.name) < len(other.name)) else False
+            return (
+                True
+                if ((self.bitrate > other.bitrate) and (self.size > other.size))
+                else True
+                if (
+                    ((self.bitrate == other.bitrate) and (self.size == other.size))
+                    and len(self.name) < len(other.name)
+                )
+                else False
+            )
         else:
             return NotImplemented
 
