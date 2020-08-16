@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from musicfile import MusicFile
 from pathlib import Path
 import sys
@@ -40,7 +42,7 @@ def output(text=None, level=0, end="\n", flush=False):
 
 
 def search_pattern(file_types):
-    pattern = '([^.].*)( \d+)?[.](' + file_types[0]
+    pattern = '([^.].*)[.](' + file_types[0]
     for file_type in file_types[1:]:
         pattern += "|" + file_type
     pattern += ")"
@@ -50,10 +52,10 @@ def search_pattern(file_types):
 def make_common_name(file):
     """
     Given a MusicFile, return the full path name minus the extension and any extra sequence characters
-    For example. /some/path/file.m4a, /some/path/file 1.m4a, and /some/path/file 2.m4a should all return
+    For example. /some/path/file.m4a, /some/path/file 1.m4a, and /some/path/file (2).m4a should all return
     /some/path/file
     """
-    return re.compile(f"( [\\d]|).[^.]+$").sub("", file.full_path_name)
+    return re.compile(f"( \d+| [(]\d+[)]|).[^.]+$").sub("", file.full_path_name)
 
 
 def get_tree_list(starting_path, file_type):
