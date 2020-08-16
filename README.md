@@ -15,7 +15,7 @@ size and bitrate files, just with slightly different names. In that case, the on
 ## Usage
 
 <pre>
-usage: findDuplicates.py [-h] [-t {mp3,ogg,opus,mp4,m4a,flac,wma,wav}]
+usage: findDuplicates.py [-h] [-t {mp3,ogg,opus,mp4,m4a,flac,wma,wav} ... --]
                          [--reallydelete] [-v]
                          path
 
