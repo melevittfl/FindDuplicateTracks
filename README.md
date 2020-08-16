@@ -6,7 +6,7 @@ The original track and a second track with a space and a 1 at the end of the nam
 `Track.m4a` and `Track 1.m4a`.
 
 This utility will find all tracks that are almost the same except for the " 1.m4a" part 
-and delete the lower bitrate one. 
+and delete the lower bitrate one. It can (and will by default) search out the same music in multiple formats eg. flac and mp3.
 
 Sometimes, iTunes seems to just duplicate the files and you and up with duplicate
 size and bitrate files, just with slightly different names. In that case, the one with the shortest name is deleted. 
@@ -26,8 +26,9 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -t {mp3,ogg,opus,mp4,m4a,flac,wma,wav}, --type {mp3,ogg,opus,mp4,m4a,flac,wma,wav}
-                        Files extension to scan. Defaults to 'm4a'
+  -t {mp3,ogg,opus,mp4,m4a,flac,wma,wav} [{mp3,ogg,opus,mp4,m4a,flac,wma,wav} ...], --type {mp3,ogg,opus,mp4,m4a,flac,wma,wav} [{mp3,ogg,opus,mp4,m4a,flac,wma,wav} ...]
+                        Files extension(s) to scan. Defaults to all choices.
+                        End list with -- or another option.
   --reallydelete        Actually delete the duplicate files on disk
   -v, --verbose         Increase output verbosity
 </pre
