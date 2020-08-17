@@ -22,9 +22,6 @@ jobs:
     - name: Install dependencies
       run: |
           pipenv install --dev
-    - name: Set PYTHONPATH
-      run: |
-          pipenv run echo "::set-env name=PYTHONPATH::/home/runner/work/FindDuplicateTracks/FindDuplicateTracks"
     - name: Test with pytest
       run: |
         pipenv run python -m pytest
