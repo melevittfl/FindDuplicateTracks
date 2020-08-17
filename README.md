@@ -31,7 +31,7 @@ optional arguments:
                         End list with -- or another option.
   --reallydelete        Actually delete the duplicate files on disk
   -v, --verbose         Increase output verbosity
-</pre
+</pre>
 
 ## Dependencies
 
