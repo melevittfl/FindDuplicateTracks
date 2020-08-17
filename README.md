@@ -11,11 +11,6 @@ and delete the lower bitrate one. It can (and will by default) search out the sa
 Sometimes, iTunes seems to just duplicate the files and you and up with duplicate
 size and bitrate files, just with slightly different names. In that case, the one with the shortest name is deleted. 
 
-## Dependencies
-
-Python3. - findDuplicates is not compatible with Python 2
-TinyTag	 - used to extract information from audio files
-tqdm	 - a utility for printing progress indications
 
 ## Usage
 
@@ -40,4 +35,8 @@ optional arguments:
 
 ## Dependencies
 
+Python3 is required; findDuplicates is not compatible with Python 2
+
 It uses the TinyTag library from https://pypi.org/project/tinytag/ to read the bitrate from the track. 
+
+tqdm	is used for printing progress indications. See https://pypi.org/project/tqdm/
