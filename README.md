@@ -35,3 +35,4 @@ optional arguments:
 ## Dependencies
 
 It uses the TinyTag library from https://pypi.org/project/tinytag/ to read the bitrate from the track. 
+
