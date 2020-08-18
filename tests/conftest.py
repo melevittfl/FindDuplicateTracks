@@ -27,7 +27,9 @@ def test_tracks():
 
     return {
         "better_worse": BetterWorse(MusicFile(best_file), MusicFile(worst_file)),
-        "equal": Equal(MusicFile(first_equal), MusicFile(second_equal), MusicFile(third_equal)),
+        "equal": Equal(
+            MusicFile(first_equal), MusicFile(second_equal), MusicFile(third_equal)
+        ),
         "short128bit": MusicFile(short_low_bitrate),
         "worst2": MusicFile(another_worst),
     }

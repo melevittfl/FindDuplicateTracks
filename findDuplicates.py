@@ -49,6 +49,7 @@ def search_pattern(file_types):
     output("Search pattern: " + pattern, 2)
     return re.compile(pattern, re.IGNORECASE)
 
+
 def make_common_name(file):
     """
     Given a MusicFile, return the full path name minus the extension and any extra sequence characters

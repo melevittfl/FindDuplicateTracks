@@ -142,7 +142,7 @@ def test_parse_args():
     with pytest.raises(SystemExit):
         parser = cli_parser(["-t doc"])
 
- 
+
 def test_search_pattern():
     pattern = search_pattern(["m4a", "ogg", "flac"])
     assert pattern.match("01 File.m4a")
@@ -151,6 +151,7 @@ def test_search_pattern():
     assert pattern.match("01 File.flac")
     assert not pattern.match("file.mp3")
     assert not pattern.match("01 File,m4a")
+
 
 def test_make_common_name(test_tracks):
     c_name1 = test_tracks["better_worse"].better.full_path_name.rstrip(".m4a")
