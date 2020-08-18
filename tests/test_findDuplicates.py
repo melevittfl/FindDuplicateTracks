@@ -50,7 +50,7 @@ def test_find_tracks_to_delete_at_path(test_tracks):
     ]
 
     list_to_delete = set(complete) - set(tracks_to_keep)
-    result = find_tracks_to_delete_at_path("resources")
+    result = find_tracks_to_delete_at_path("tests/resources")
     assert isinstance(result[0], MusicFile)
     assert set(result) == set(list_to_delete)
 
@@ -60,7 +60,7 @@ def test_delete_tracks(tmpdir):
     keep_list = []
     for i in range(0, 6):
         path = Path(tmpdir / f"test_file{i:03d}.tmp")
-        shutil.copy("resources/128bits.m4a", path)
+        shutil.copy("tests/resources/128bits.m4a", path)
         if i % 2:
             delete_list.append(MusicFile(path))
         else:
