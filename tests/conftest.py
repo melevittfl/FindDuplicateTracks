@@ -20,13 +20,14 @@ def test_tracks():
 
     first_equal = Path("resources/Equal 1.m4a")
     second_equal = Path("resources/Equal.m4a")
+    third_equal = Path("resources/Equal (2).m4a")
 
     BetterWorse = namedtuple("BetterWorse", ["better", "worse"])
-    Equal = namedtuple("Equal", ["longer", "shorter"])
+    Equal = namedtuple("Equal", ["longer", "shorter", "longest"])
 
     return {
         "better_worse": BetterWorse(MusicFile(best_file), MusicFile(worst_file)),
-        "equal": Equal(MusicFile(first_equal), MusicFile(second_equal)),
+        "equal": Equal(MusicFile(first_equal), MusicFile(second_equal), MusicFile(third_equal)),
         "short128bit": MusicFile(short_low_bitrate),
         "worst2": MusicFile(another_worst),
     }
@@ -41,6 +42,7 @@ def test_tree(tmpdir_factory):
 
     first_equal = Path("resources/Equal 1.m4a")
     second_equal = Path("resources/Equal.m4a")
+    third_equal = Path("resources/Equal (2).m4a")
 
     tmpdir = tmpdir_factory.mktemp("music_files")
 
@@ -53,6 +55,7 @@ def test_tree(tmpdir_factory):
         "short": short_low_bitrate,
         "equal1": first_equal,
         "equal": second_equal,
+        "equal2": third_equal,
         "worst2": another_worst,
         "path": tmpdir,
     }
