@@ -42,7 +42,7 @@ def output(text=None, level=0, end="\n", flush=False):
 
 
 def search_pattern(file_types):
-    pattern = '([^.].*)[.](' + file_types[0]
+    pattern = "([^.].*)[.](" + file_types[0]
     for file_type in file_types[1:]:
         pattern += "|" + file_type
     pattern += ")"
@@ -55,7 +55,7 @@ def make_common_name(file):
     For example. /some/path/file.m4a, /some/path/file 1.m4a, and /some/path/file (2).m4a should all return
     /some/path/file
     """
-    return re.compile(f"( \d+| [(]\d+[)]|).[^.]+$").sub("", file.full_path_name)
+    return re.compile(r"( \d+| [(]\d+[)]|).[^.]+$").sub("", file.full_path_name)
 
 
 def get_tree_list(starting_path, file_type):
