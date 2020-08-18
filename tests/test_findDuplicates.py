@@ -38,6 +38,7 @@ def test_find_tracks_to_delete_at_path(test_tracks):
         test_tracks["better_worse"].worse,
         test_tracks["equal"].shorter,
         test_tracks["equal"].longer,
+        test_tracks["equal"].longest,
         test_tracks["short128bit"],
         test_tracks["worst2"],
     ]
@@ -89,6 +90,7 @@ def test_main(test_tree):
         test_tree["worst"],
         test_tree["equal"],
         test_tree["equal1"],
+        test_tree["equal2"],
         test_tree["short"],
         test_tree["worst2"],
     ]
@@ -125,11 +127,11 @@ def test_get_tree_list(tmpdir):
 
 
 def test_parse_args():
-    parsed = cli_parser(["/Some/Path", "--reallydelete", "-vv", "-t", "m4a"])
+    parsed = cli_parser(["/Some/Path", "--reallydelete", "-vv", "-t", "m4a", "ogg"])
     assert parsed.path == "/Some/Path"
     assert parsed.reallydelete
     assert parsed.verbose == 2
-    assert parsed.type == "m4a"
+    assert parsed.type == ["m4a", "ogg"]
 
     parsed = cli_parser(["/Some/Path"])
     assert not parsed.reallydelete
@@ -140,19 +142,28 @@ def test_parse_args():
     with pytest.raises(SystemExit):
         parser = cli_parser(["-t doc"])
 
-
+ 
 def test_search_pattern():
-    assert search_pattern("m4a") == "*.m4a"
-
+    pattern = search_pattern(["m4a", "ogg", "flac"])
+    assert pattern.match("01 File.m4a")
+    assert not pattern.match(".hidden.m4a")
+    assert pattern.match("01 File.ogg")
+    assert pattern.match("01 File.flac")
+    assert not pattern.match("file.mp3")
+    assert not pattern.match("01 File,m4a")
 
 def test_make_common_name(test_tracks):
     c_name1 = test_tracks["better_worse"].better.full_path_name.rstrip(".m4a")
-    result1 = make_common_name(test_tracks["better_worse"].better, "m4a")
+    result1 = make_common_name(test_tracks["better_worse"].better)
     assert result1 == c_name1
 
     c_name2 = test_tracks["better_worse"].worse.full_path_name.rstrip(" 1.m4a")
-    result2 = make_common_name(test_tracks["better_worse"].worse, "m4a")
+    result2 = make_common_name(test_tracks["better_worse"].worse)
     assert result2 == c_name2
+
+    c_name3 = test_tracks["equal"].longest.full_path_name.rstrip(" (2).m4a")
+    result3 = make_common_name(test_tracks["equal"].longest)
+    assert result3 == c_name3
 
 
 def test_output(capsys):

@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from musicfile import MusicFile
 from pathlib import Path
 import sys
@@ -5,7 +7,7 @@ from collections import defaultdict
 from tqdm import tqdm
 import argparse
 import re
-
+import os
 
 VERBOSE = 0
 
@@ -18,8 +20,9 @@ def cli_parser(command_line):
     parser.add_argument(
         "-t",
         "--type",
-        default="m4a",
-        help="Files extension to scan. Defaults to 'm4a'",
+        nargs="+",
+        default=["m4a", "ogg", "opus", "mp4", "m4a", "flac", "wma", "wav"],
+        help="Files extension(s) to scan. Defaults to all choices.\nEnd list with -- or another option.",
         choices=["mp3", "ogg", "opus", "mp4", "m4a", "flac", "wma", "wav"],
     )
     parser.add_argument(
@@ -38,17 +41,21 @@ def output(text=None, level=0, end="\n", flush=False):
         print(text, end=end, flush=flush)
 
 
-def search_pattern(file_type):
-    return "*." + file_type
+def search_pattern(file_types):
+    pattern = "([^.].*)[.](" + file_types[0]
+    for file_type in file_types[1:]:
+        pattern += "|" + file_type
+    pattern += ")"
+    output("Search pattern: " + pattern, 2)
+    return re.compile(pattern, re.IGNORECASE)
 
-
-def make_common_name(file, file_type):
+def make_common_name(file):
     """
     Given a MusicFile, return the full path name minus the extension and any extra sequence characters
-    For example. /some/path/file.m4a, /some/path/file 1.m4a, and /some/path/file 2.m4a should all return
+    For example. /some/path/file.m4a, /some/path/file 1.m4a, and /some/path/file (2).m4a should all return
     /some/path/file
     """
-    return re.compile(f"( [\\d]|).{file_type}$").sub("", file.full_path_name)
+    return re.compile(r"( \d+| [(]\d+[)]|).[^.]+$").sub("", file.full_path_name)
 
 
 def get_tree_list(starting_path, file_type):
@@ -56,12 +63,14 @@ def get_tree_list(starting_path, file_type):
     pattern = search_pattern(file_type)
     total = 0
     track_list = []
-    for track_path in Path(starting_path).rglob(pattern):
-        if track_path.is_file() and not track_path.name.startswith("._"):
-            if total % 500 == 0:
-                output(".", end="", flush=True)
-            track_list.append(track_path)
-            total += 1
+    for dirpath, dirnames, tracknames in os.walk(starting_path):
+        for track_path in tracknames:
+            track_match = pattern.fullmatch(track_path)
+            if track_match:
+                if total % 500 == 0:
+                    output(".", end="", flush=True)
+                track_list.append(os.path.join(dirpath, track_path))
+                total += 1
     output("Done.")
     return track_list
 
@@ -109,7 +118,7 @@ def best_track(first_file=None, second_file=None):
     )
 
 
-def find_tracks_to_delete_at_path(starting_path=".", file_type="m4a"):
+def find_tracks_to_delete_at_path(starting_path=".", file_type=["m4a"]):
     output(f"Examining directory: {starting_path}")
 
     tracks_to_keep = defaultdict(lambda: None)
@@ -125,7 +134,7 @@ def find_tracks_to_delete_at_path(starting_path=".", file_type="m4a"):
         for track in (MusicFile(x) for x in file_list):
             if VERBOSE > 0:
                 tqdm.write(f"Checking: {track.name}")
-            common_name = make_common_name(track, file_type)
+            common_name = make_common_name(track)
             tracks_to_keep[common_name], delete_candidate = best_track(
                 tracks_to_keep[common_name], track
             )
