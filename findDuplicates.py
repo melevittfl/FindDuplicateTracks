@@ -21,7 +21,7 @@ def cli_parser(command_line):
         "-t",
         "--type",
         nargs="+",
-        default=["m4a", "ogg", "opus", "mp4", "m4a", "flac", "wma", "wav"],
+        default=["mp3", "ogg", "opus", "mp4", "m4a", "flac", "wma", "wav"],
         help="Files extension(s) to scan. Defaults to all choices.\nEnd list with -- or another option.",
         choices=["mp3", "ogg", "opus", "mp4", "m4a", "flac", "wma", "wav"],
     )
