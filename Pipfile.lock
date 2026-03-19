@@ -41,10 +41,12 @@
         },
         "tinytag": {
             "hashes": [
-                "sha256:019960aff4002c90dc32ca188db3ae00dde0645338712c6b37a17b2ebd9816fb"
+                "sha256:e6d06610ebe7cd66fd07be2d3b9495914ab32654a5e47657bb8cd44c2484523c",
+                "sha256:ed8b1e6d25367937e3321e054f4974f9abfde1a3e0a538824c87da377130c2b6"
             ],
             "index": "pypi",
-            "version": "==1.6.0"
+            "markers": "python_version >= '3.7'",
+            "version": "==2.2.1"
         },
         "tqdm": {
             "hashes": [
