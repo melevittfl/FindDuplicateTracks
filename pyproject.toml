@@ -1,0 +1,15 @@
+[project]
+name = "find-duplicate-tracks"
+version = "1.0.0"
+description = "Find and delete duplicate music files left by iTunes or music taggers"
+requires-python = ">=3.14"
+dependencies = [
+    "tinytag>=2.2.1",
+    "tqdm>=4.67.3",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
+

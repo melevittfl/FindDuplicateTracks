@@ -37,12 +37,32 @@ optional arguments:
 
 ## Dependencies
 
-Python3 is required; findDuplicates is not compatible with Python 2
+Python 3.14+ is required. Dependencies are managed with [uv](https://docs.astral.sh/uv/).
 
-It uses the TinyTag library from https://pypi.org/project/tinytag/ to read the bitrate from the track. 
+Install uv if you don't have it:
 
-tqdm is used for printing progress indications. See https://pypi.org/project/tqdm/
+```
+brew install uv
+```
 
-pytest is the testing framework for running the test scripts. See https://pypi.org/project/pytest/ 
+Then install all dependencies and run the tests:
 
-pip isn't actually needed but is the best tool for locating and installing the other Python dependencies.
+```
+uv sync --all-groups
+uv run python -m pytest
+```
+
+To run the tool:
+
+```
+uv run python findDuplicates.py /path/to/Music
+```
+
+Runtime dependencies:
+
+- [TinyTag](https://pypi.org/project/tinytag/) — reads bitrate from audio files
+- [tqdm](https://pypi.org/project/tqdm/) — progress bars
+
+Development dependencies:
+
+- [pytest](https://pypi.org/project/pytest/) — test framework
