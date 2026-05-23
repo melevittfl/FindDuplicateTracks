@@ -9,7 +9,6 @@ pytest = "*"
 [packages]
 tinytag = "*"
 tqdm = "*"
-progressbar2 = "*"
 
 [requires]
 python_version = "3.9"

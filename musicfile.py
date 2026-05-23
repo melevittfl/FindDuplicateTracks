@@ -2,7 +2,7 @@ from tinytag import TinyTag
 from pathlib import Path
 
 
-class MusicFile(object):
+class MusicFile:
     def __init__(self, filename):
         self.path = Path(filename)
 
@@ -40,20 +40,19 @@ class MusicFile(object):
             return NotImplemented
 
     def __gt__(self, other):
-        """One file is greater if it has a higher bitrate or, if equal, the shorter name"""
+        """One file is greater if it has a higher bitrate or, if equal bitrate and size, the shorter name"""
         if isinstance(other, MusicFile):
-            return (
-                True
-                if ((self.bitrate > other.bitrate) and (self.size > other.size))
-                else True
-                if (
-                    ((self.bitrate == other.bitrate) and (self.size == other.size))
-                    and len(self.name) < len(other.name)
-                )
-                else False
-            )
-        else:
-            return NotImplemented
+            if self.bitrate > other.bitrate:
+                return True
+            if self.bitrate == other.bitrate and self.size == other.size:
+                return len(self.name) < len(other.name)
+            return False
+        return NotImplemented
+
+    def __lt__(self, other):
+        if isinstance(other, MusicFile):
+            return other.__gt__(self)
+        return NotImplemented
 
     def __hash__(self):
         return hash((self.size, self.full_path_name))

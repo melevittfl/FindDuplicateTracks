@@ -7,7 +7,6 @@ from collections import defaultdict
 from tqdm import tqdm
 import argparse
 import re
-import os
 
 VERBOSE = 0
 
@@ -56,22 +55,18 @@ def make_common_name(file):
     For example. /some/path/file.m4a, /some/path/file 1.m4a, and /some/path/file (2).m4a should all return
     /some/path/file
     """
-    return re.compile(r"( \d+| [(]\d+[)]|).[^.]+$").sub("", file.full_path_name)
+    return re.compile(r"( \d+| [(]\d+[)]|)\.[^.]+$").sub("", file.full_path_name)
 
 
 def get_tree_list(starting_path, file_type):
     """Return a list of tracks for the given file type"""
     pattern = search_pattern(file_type)
-    total = 0
     track_list = []
-    for dirpath, dirnames, tracknames in os.walk(starting_path):
-        for track_path in tracknames:
-            track_match = pattern.fullmatch(track_path)
-            if track_match:
-                if total % 500 == 0:
-                    output(".", end="", flush=True)
-                track_list.append(os.path.join(dirpath, track_path))
-                total += 1
+    for total, track_path in enumerate(Path(starting_path).rglob("*")):
+        if pattern.fullmatch(track_path.name):
+            if total % 500 == 0:
+                output(".", end="", flush=True)
+            track_list.append(str(track_path))
     output("Done.")
     return track_list
 
@@ -91,14 +86,13 @@ def delete_tracks(tracks, delete_the_files=False):
             bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}",
             unit="files",
         ) as pbar:
-            for track in tqdm(tracks):
+            for track in tracks:
                 tqdm.write(f"Deleting {track}...", end="")
                 if delete_the_files:
                     track.path.unlink()
                     tqdm.write("Deleted")
                 else:
                     tqdm.write("Test mode. Track not deleted")
-                    pass
                 pbar.update(1)
 
 
@@ -119,7 +113,9 @@ def best_track(first_file=None, second_file=None):
     )
 
 
-def find_tracks_to_delete_at_path(starting_path=".", file_type=["m4a"]):
+def find_tracks_to_delete_at_path(starting_path=".", file_type=None):
+    if file_type is None:
+        file_type = ["m4a"]
     output(f"Examining directory: {starting_path}")
 
     tracks_to_keep = defaultdict(lambda: None)

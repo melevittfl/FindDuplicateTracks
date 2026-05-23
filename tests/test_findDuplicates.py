@@ -1,6 +1,18 @@
 import pytest
 import shutil
-from findDuplicates import *
+from pathlib import Path
+from musicfile import MusicFile
+from findDuplicates import (
+    best_track,
+    cli_parser,
+    delete_tracks,
+    find_tracks_to_delete_at_path,
+    get_tree_list,
+    main,
+    make_common_name,
+    output,
+    search_pattern,
+)
 
 
 def test_best_track(test_tracks):
@@ -118,12 +130,11 @@ def test_get_tree_list(tmpdir):
         d.mkdir()
         for i in range(0, 20):
             f = Path(d / f"test_file{i:03d}.tmp")
-
             f.touch()
 
-    expected = list(Path(tmpdir).rglob(".tmp"))
+    expected = [str(p) for p in Path(tmpdir).rglob("*.tmp")]
 
-    assert set(get_tree_list(tmpdir, ".tmp")) == set(expected)
+    assert set(get_tree_list(tmpdir, ["tmp"])) == set(expected)
 
 
 def test_parse_args():
@@ -154,17 +165,14 @@ def test_search_pattern():
 
 
 def test_make_common_name(test_tracks):
-    c_name1 = test_tracks["better_worse"].better.full_path_name.rstrip(".m4a")
-    result1 = make_common_name(test_tracks["better_worse"].better)
-    assert result1 == c_name1
+    base = test_tracks["better_worse"].better.full_path_name.removesuffix(".m4a")
+    assert make_common_name(test_tracks["better_worse"].better) == base
 
-    c_name2 = test_tracks["better_worse"].worse.full_path_name.rstrip(" 1.m4a")
-    result2 = make_common_name(test_tracks["better_worse"].worse)
-    assert result2 == c_name2
+    base_with_seq = test_tracks["better_worse"].worse.full_path_name.removesuffix(" 1.m4a")
+    assert make_common_name(test_tracks["better_worse"].worse) == base_with_seq
 
-    c_name3 = test_tracks["equal"].longest.full_path_name.rstrip(" (2).m4a")
-    result3 = make_common_name(test_tracks["equal"].longest)
-    assert result3 == c_name3
+    base_parens = test_tracks["equal"].longest.full_path_name.removesuffix(" (2).m4a")
+    assert make_common_name(test_tracks["equal"].longest) == base_parens
 
 
 def test_output(capsys):

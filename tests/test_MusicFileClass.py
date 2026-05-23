@@ -9,12 +9,12 @@ def test_musicfile_class(music_file):
 
 def test_musicfile_returns_bitrate(music_file):
     assert music_file["class"].bitrate == 256
-    assert type(music_file["class"].bitrate) == float
+    assert isinstance(music_file["class"].bitrate, float)
 
 
 def test_musicfile_returns_size(music_file):
     assert music_file["class"].size == 798880
-    assert type(music_file["class"].size) == int
+    assert isinstance(music_file["class"].size, int)
 
 
 def test_musicfile_returns_path(music_file):
