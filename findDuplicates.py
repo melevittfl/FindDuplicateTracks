@@ -4,11 +4,21 @@ from musicfile import MusicFile
 from pathlib import Path
 import sys
 from collections import defaultdict
-from tqdm import tqdm
+from rich.console import Console
+from rich.progress import (
+    Progress,
+    BarColumn,
+    MofNCompleteColumn,
+    SpinnerColumn,
+    TextColumn,
+    TimeElapsedColumn,
+)
+from rich.table import Table
 import argparse
 import re
 
 VERBOSE = 0
+console = Console(highlight=False)
 
 
 def cli_parser(command_line):
@@ -35,9 +45,9 @@ def cli_parser(command_line):
     return parser.parse_args(command_line)
 
 
-def output(text=None, level=0, end="\n", flush=False):
+def output(text=None, level=0, end="\n"):
     if level <= VERBOSE:
-        print(text, end=end, flush=flush)
+        console.print(text, end=end)
 
 
 def search_pattern(file_types):
@@ -63,16 +73,29 @@ def get_tree_list(starting_path, file_type):
     pattern = search_pattern(file_type)
     seen = set()
     track_list = []
-    for total, track_path in enumerate(Path(starting_path).rglob("*")):
-        if track_path.is_file() and pattern.fullmatch(track_path.name):
-            if total % 500 == 0:
-                output(".", end="", flush=True)
-            resolved = str(track_path.resolve())
-            if resolved not in seen:
-                seen.add(resolved)
-                track_list.append(resolved)
-    output("Done.")
+    with console.status("[bold green]Scanning for music files...") as status:
+        for total, track_path in enumerate(Path(starting_path).rglob("*")):
+            if track_path.is_file() and pattern.fullmatch(track_path.name):
+                resolved = str(track_path.resolve())
+                if resolved not in seen:
+                    seen.add(resolved)
+                    track_list.append(resolved)
+                    status.update(
+                        f"[bold green]Scanning...[/bold green] {len(track_list):,} tracks found"
+                    )
+    console.print(f"[green]✓[/green] Found [bold]{len(track_list):,}[/bold] tracks\n")
     return track_list
+
+
+def _progress_bar():
+    return Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        MofNCompleteColumn(),
+        TimeElapsedColumn(),
+        console=console,
+    )
 
 
 def delete_tracks(tracks, delete_the_files=False):
@@ -84,20 +107,16 @@ def delete_tracks(tracks, delete_the_files=False):
     if not tracks:
         output("No tracks to delete")
     else:
-        with tqdm(
-            desc=message,
-            total=len(tracks),
-            bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}",
-            unit="files",
-        ) as pbar:
+        with _progress_bar() as progress:
+            task = progress.add_task(message, total=len(tracks))
             for track in tracks:
-                tqdm.write(f"Deleting {track}...", end="")
+                progress.console.print(f"  [dim]{track}[/dim]", end="")
                 if delete_the_files:
                     track.path.unlink()
-                    tqdm.write("Deleted")
+                    progress.console.print(" [green]deleted[/green]")
                 else:
-                    tqdm.write("Test mode. Track not deleted")
-                pbar.update(1)
+                    progress.console.print(" [yellow]skipped (test mode)[/yellow]")
+                progress.advance(task)
 
 
 def best_track(first_file=None, second_file=None):
@@ -123,32 +142,28 @@ def find_tracks_to_delete_at_path(starting_path=".", file_type=None):
     output(f"Examining directory: {starting_path}")
 
     tracks_to_keep = defaultdict(lambda: None)
-    delete_pairs = []  # list of (keep, delete) tuples
+    delete_pairs = []
     file_list = get_tree_list(starting_path, file_type)
     output(f"{len(file_list)} tracks found.", level=2)
-    with tqdm(
-        desc="Finding duplicates",
-        total=len(file_list),
-        bar_format="{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt}",
-        unit="files",
-    ) as pbar:
+    with _progress_bar() as progress:
+        task = progress.add_task("Finding duplicates...", total=len(file_list))
         for track in (MusicFile(x) for x in file_list):
             if VERBOSE > 1:
-                tqdm.write(f"Checking: {track.full_path_name}")
+                progress.console.print(f"  Checking: [dim]{track.full_path_name}[/dim]")
             common_name = make_common_name(track)
             if VERBOSE > 2:
-                tqdm.write(f"  Common name: {common_name}")
+                progress.console.print(f"  Common name: [dim]{common_name}[/dim]")
             tracks_to_keep[common_name], delete_candidate = best_track(
                 tracks_to_keep[common_name], track
             )
             if delete_candidate is not None:
                 delete_pairs.append((tracks_to_keep[common_name], delete_candidate))
                 if VERBOSE > 0:
-                    tqdm.write(
-                        f"  Duplicate — keep:   {tracks_to_keep[common_name].full_path_name}"
-                        f"\n             delete: {delete_candidate.full_path_name}"
+                    progress.console.print(
+                        f"  [green]Keep:[/green]   {tracks_to_keep[common_name].full_path_name}\n"
+                        f"  [red]Delete:[/red] {delete_candidate.full_path_name}"
                     )
-            pbar.update(1)
+            progress.advance(task)
 
     _print_duplicate_summary(delete_pairs)
     return [delete for _, delete in delete_pairs]
@@ -156,21 +171,26 @@ def find_tracks_to_delete_at_path(starting_path=".", file_type=None):
 
 def _print_duplicate_summary(delete_pairs):
     if not delete_pairs:
-        output("No duplicates found.")
+        console.print("\n[green]No duplicates found.[/green]")
         return
 
-    output(f"\nFound {len(delete_pairs)} duplicate pair(s):\n")
+    table = Table(
+        title=f"Found {len(delete_pairs)} duplicate pair(s)",
+        show_lines=True,
+    )
+    table.add_column("Keep", style="green", no_wrap=False)
+    table.add_column("Delete", style="red", no_wrap=False)
+
     for keep, delete in delete_pairs:
         keep_path = Path(keep.full_path_name)
         delete_path = Path(delete.full_path_name)
         if keep_path.parent == delete_path.parent:
-            output(f"  {keep_path.parent}/")
-            output(f"    Keep:   {keep_path.name}")
-            output(f"    Delete: {delete_path.name}")
+            dir_prefix = f"[dim]{keep_path.parent}/[/dim]\n"
+            table.add_row(dir_prefix + keep_path.name, dir_prefix + delete_path.name)
         else:
-            output(f"  Keep:   {keep.full_path_name}")
-            output(f"  Delete: {delete.full_path_name}")
-        output("")
+            table.add_row(keep.full_path_name, delete.full_path_name)
+
+    console.print(table)
 
 
 def main(cli_arguments):

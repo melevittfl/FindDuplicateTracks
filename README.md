@@ -61,7 +61,7 @@ uv run python findDuplicates.py /path/to/Music
 Runtime dependencies:
 
 - [TinyTag](https://pypi.org/project/tinytag/) — reads bitrate from audio files
-- [tqdm](https://pypi.org/project/tqdm/) — progress bars
+- [Rich](https://pypi.org/project/rich/) — styled terminal output and progress bars
 
 Development dependencies:
 
