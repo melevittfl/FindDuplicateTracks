@@ -45,26 +45,14 @@ def test_best_track(test_tracks):
 
 
 def test_find_tracks_to_delete_at_path(test_tracks):
-    complete = [
-        test_tracks["better_worse"].better,
-        test_tracks["better_worse"].worse,
-        test_tracks["equal"].shorter,
-        test_tracks["equal"].longer,
-        test_tracks["equal"].longest,
-        test_tracks["short128bit"],
-        test_tracks["worst2"],
-    ]
-
-    tracks_to_keep = [
-        test_tracks["better_worse"].better,
-        test_tracks["equal"].shorter,
-        test_tracks["short128bit"],
-    ]
-
-    list_to_delete = set(complete) - set(tracks_to_keep)
+    # Only " 1" and " (1)" suffixes are treated as duplicates; " 2", " (2)" etc. are not.
+    expected_to_delete = {
+        test_tracks["better_worse"].worse,   # amazing_track 1.m4a  → duplicate of amazing_track.m4a
+        test_tracks["equal"].longer,         # Equal 1.m4a           → duplicate of Equal.m4a
+    }
     result = find_tracks_to_delete_at_path("tests/resources")
     assert isinstance(result[0], MusicFile)
-    assert set(result) == set(list_to_delete)
+    assert set(result) == expected_to_delete
 
 
 def test_delete_tracks(tmpdir):
@@ -107,7 +95,8 @@ def test_main(test_tree):
         test_tree["worst2"],
     ]
 
-    tracks_to_keep = [test_tree["best"], test_tree["equal"], test_tree["short"]]
+    # worst2 (amazing_track 2.m4a) and equal2 (Equal (2).m4a) are not duplicates under the new rules
+    tracks_to_keep = [test_tree["best"], test_tree["equal"], test_tree["short"], test_tree["worst2"], test_tree["equal2"]]
 
     temp_dir = test_tree["path"]
     temp_dir_string = temp_dir.strpath
@@ -165,14 +154,18 @@ def test_search_pattern():
 
 
 def test_make_common_name(test_tracks):
-    base = test_tracks["better_worse"].better.full_path_name.removesuffix(".m4a")
-    assert make_common_name(test_tracks["better_worse"].better) == base
+    better = test_tracks["better_worse"].better
+    worse = test_tracks["better_worse"].worse
+    longest = test_tracks["equal"].longest
 
-    base_with_seq = test_tracks["better_worse"].worse.full_path_name.removesuffix(" 1.m4a")
-    assert make_common_name(test_tracks["better_worse"].worse) == base_with_seq
+    # No suffix: strip extension only
+    assert make_common_name(better) == better.full_path_name.removesuffix(".m4a")
 
-    base_parens = test_tracks["equal"].longest.full_path_name.removesuffix(" (2).m4a")
-    assert make_common_name(test_tracks["equal"].longest) == base_parens
+    # " 1" suffix: treated as a duplicate marker, stripped along with the extension
+    assert make_common_name(worse) == worse.full_path_name.removesuffix(" 1.m4a")
+
+    # " (2)" suffix: NOT a duplicate marker, strip extension only
+    assert make_common_name(longest) == longest.full_path_name.removesuffix(".m4a")
 
 
 def test_output(capsys):

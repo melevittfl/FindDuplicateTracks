@@ -61,11 +61,11 @@ def search_pattern(file_types):
 
 def make_common_name(file):
     """
-    Given a MusicFile, return the full path name minus the extension and any extra sequence characters
-    For example. /some/path/file.m4a, /some/path/file 1.m4a, and /some/path/file (2).m4a should all return
-    /some/path/file
+    Given a MusicFile, return the full path name minus the extension and any iTunes/Picard
+    first-duplicate suffix. Only " 1" and " (1)" are treated as duplicate markers — higher
+    numbers (e.g. "Episode 2") are assumed to be legitimately distinct files.
     """
-    return re.compile(r"( \d+| [(]\d+[)]|)\.[^.]+$").sub("", file.full_path_name)
+    return re.compile(r"( 1| [(]1[)]|)\.[^.]+$").sub("", file.full_path_name)
 
 
 def get_tree_list(starting_path, file_type):
