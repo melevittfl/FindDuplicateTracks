@@ -131,25 +131,27 @@ def delete_tracks(tracks, rename_pairs=None, delete_the_files=False):
     with _progress_bar() as progress:
         task = progress.add_task(message, total=total)
         for track in tracks:
-            progress.console.print(f"  [dim]{track}[/dim]", end="")
             if delete_the_files:
                 track.path.unlink()
-                progress.console.print(" [green]deleted[/green]")
+                progress.console.print(f"  [red]Deleted:[/red]  {track}")
             else:
-                progress.console.print(" [yellow]skipped (test mode)[/yellow]")
+                progress.console.print(f"  [dim]Delete:   {track}[/dim]")
             progress.advance(task)
         for keep_file, new_path in rename_pairs:
-            progress.console.print(
-                f"  [dim]{keep_file.path.name}[/dim] → [dim]{new_path.name}[/dim]", end=""
-            )
             if delete_the_files:
                 if new_path.exists():
-                    progress.console.print(" [red]rename skipped (target exists)[/red]")
+                    progress.console.print(
+                        f"  [red]Rename skipped (target exists):[/red] {keep_file.path.name} → {new_path.name}"
+                    )
                 else:
                     keep_file.path.rename(new_path)
-                    progress.console.print(" [green]renamed[/green]")
+                    progress.console.print(
+                        f"  [green]Renamed:[/green]  {keep_file.path.name} → {new_path.name}"
+                    )
             else:
-                progress.console.print(" [yellow]skipped (test mode)[/yellow]")
+                progress.console.print(
+                    f"  [dim]Rename:   {keep_file.path.name} → {new_path.name}[/dim]"
+                )
             progress.advance(task)
 
 
@@ -257,11 +259,16 @@ def main(cli_arguments):
             return
 
     if not parsed.reallydelete:
+        rename_note = f" and rename {len(rename_pairs)}" if rename_pairs else ""
         console.print(
-            f"[yellow]Test mode — add --reallydelete to delete {len(delete_list)} file(s)"
-            + (f" and rename {len(rename_pairs)}" if rename_pairs else "")
-            + ".[/yellow]"
+            f"[yellow]Test mode — would delete {len(delete_list)} file(s){rename_note}."
+            " Add --reallydelete to proceed.[/yellow]"
         )
+        if VERBOSE > 0:
+            for track in delete_list:
+                console.print(f"  [dim]Delete:  {track}[/dim]")
+            for keep_file, new_path in rename_pairs:
+                console.print(f"  [dim]Rename:  {keep_file.path.name} → {new_path.name}[/dim]")
         return
 
     delete_tracks(delete_list, rename_pairs, delete_the_files=True)
