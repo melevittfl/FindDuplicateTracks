@@ -61,12 +61,16 @@ def make_common_name(file):
 def get_tree_list(starting_path, file_type):
     """Return a list of tracks for the given file type"""
     pattern = search_pattern(file_type)
+    seen = set()
     track_list = []
     for total, track_path in enumerate(Path(starting_path).rglob("*")):
-        if pattern.fullmatch(track_path.name):
+        if track_path.is_file() and pattern.fullmatch(track_path.name):
             if total % 500 == 0:
                 output(".", end="", flush=True)
-            track_list.append(str(track_path))
+            resolved = str(track_path.resolve())
+            if resolved not in seen:
+                seen.add(resolved)
+                track_list.append(resolved)
     output("Done.")
     return track_list
 
@@ -119,7 +123,7 @@ def find_tracks_to_delete_at_path(starting_path=".", file_type=None):
     output(f"Examining directory: {starting_path}")
 
     tracks_to_keep = defaultdict(lambda: None)
-    tracks_to_delete = []
+    delete_pairs = []  # list of (keep, delete) tuples
     file_list = get_tree_list(starting_path, file_type)
     output(f"{len(file_list)} tracks found.", level=2)
     with tqdm(
@@ -129,18 +133,44 @@ def find_tracks_to_delete_at_path(starting_path=".", file_type=None):
         unit="files",
     ) as pbar:
         for track in (MusicFile(x) for x in file_list):
-            if VERBOSE > 0:
-                tqdm.write(f"Checking: {track.name}")
+            if VERBOSE > 1:
+                tqdm.write(f"Checking: {track.full_path_name}")
             common_name = make_common_name(track)
+            if VERBOSE > 2:
+                tqdm.write(f"  Common name: {common_name}")
             tracks_to_keep[common_name], delete_candidate = best_track(
                 tracks_to_keep[common_name], track
             )
             if delete_candidate is not None:
-                tracks_to_delete.append(delete_candidate)
+                delete_pairs.append((tracks_to_keep[common_name], delete_candidate))
+                if VERBOSE > 0:
+                    tqdm.write(
+                        f"  Duplicate — keep:   {tracks_to_keep[common_name].full_path_name}"
+                        f"\n             delete: {delete_candidate.full_path_name}"
+                    )
             pbar.update(1)
-    output(f"Done. Found {len(tracks_to_delete)} duplicate tracks")
 
-    return tracks_to_delete
+    _print_duplicate_summary(delete_pairs)
+    return [delete for _, delete in delete_pairs]
+
+
+def _print_duplicate_summary(delete_pairs):
+    if not delete_pairs:
+        output("No duplicates found.")
+        return
+
+    output(f"\nFound {len(delete_pairs)} duplicate pair(s):\n")
+    for keep, delete in delete_pairs:
+        keep_path = Path(keep.full_path_name)
+        delete_path = Path(delete.full_path_name)
+        if keep_path.parent == delete_path.parent:
+            output(f"  {keep_path.parent}/")
+            output(f"    Keep:   {keep_path.name}")
+            output(f"    Delete: {delete_path.name}")
+        else:
+            output(f"  Keep:   {keep.full_path_name}")
+            output(f"  Delete: {delete.full_path_name}")
+        output("")
 
 
 def main(cli_arguments):
