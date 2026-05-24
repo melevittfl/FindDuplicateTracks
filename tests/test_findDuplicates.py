@@ -142,10 +142,10 @@ def test_parse_args():
     assert not parsed.reallydelete
 
     with pytest.raises(SystemExit):
-        parser = cli_parser([])
+        cli_parser([])
 
     with pytest.raises(SystemExit):
-        parser = cli_parser(["-t doc"])
+        cli_parser(["-t doc"])
 
 
 def test_search_pattern():
