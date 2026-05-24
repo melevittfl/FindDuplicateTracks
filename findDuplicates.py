@@ -40,6 +40,12 @@ def cli_parser(command_line):
         help="Actually delete the duplicate files on disk",
     )
     parser.add_argument(
+        "-y",
+        "--yes",
+        action="store_true",
+        help="Skip the confirmation prompt (requires --reallydelete to actually delete)",
+    )
+    parser.add_argument(
         "-v", "--verbose", action="count", help="Increase output verbosity"
     )
     return parser.parse_args(command_line)
@@ -59,13 +65,28 @@ def search_pattern(file_types):
     return re.compile(pattern, re.IGNORECASE)
 
 
+_DUPLICATE_SUFFIX_RE = re.compile(r"( 1| [(]1[)]|)\.[^.]+$")
+_RENAME_RE = re.compile(r"( 1| \(1\))$")
+
+
 def make_common_name(file):
     """
     Given a MusicFile, return the full path name minus the extension and any iTunes/Picard
     first-duplicate suffix. Only " 1" and " (1)" are treated as duplicate markers — higher
     numbers (e.g. "Episode 2") are assumed to be legitimately distinct files.
     """
-    return re.compile(r"( 1| [(]1[)]|)\.[^.]+$").sub("", file.full_path_name)
+    return _DUPLICATE_SUFFIX_RE.sub("", file.full_path_name)
+
+
+def _rename_target(file):
+    """
+    If file has a ' 1' or ' (1)' suffix, return the Path it should be renamed to after its
+    duplicate is deleted. Returns None when no rename is needed.
+    """
+    new_stem = _RENAME_RE.sub("", file.path.stem)
+    if new_stem != file.path.stem:
+        return file.path.parent / (new_stem + file.path.suffix)
+    return None
 
 
 def get_tree_list(starting_path, file_type):
@@ -98,25 +119,38 @@ def _progress_bar():
     )
 
 
-def delete_tracks(tracks, delete_the_files=False):
-    if delete_the_files:
-        message = f"Deleting {len(tracks)} files"
-    else:
-        message = "Test mode - skipping delete"
+def delete_tracks(tracks, rename_pairs=None, delete_the_files=False):
+    rename_pairs = rename_pairs or []
 
     if not tracks:
         output("No tracks to delete")
-    else:
-        with _progress_bar() as progress:
-            task = progress.add_task(message, total=len(tracks))
-            for track in tracks:
-                progress.console.print(f"  [dim]{track}[/dim]", end="")
-                if delete_the_files:
-                    track.path.unlink()
-                    progress.console.print(" [green]deleted[/green]")
+        return
+
+    total = len(tracks) + len(rename_pairs)
+    message = f"Deleting {len(tracks)} file(s)"
+    with _progress_bar() as progress:
+        task = progress.add_task(message, total=total)
+        for track in tracks:
+            progress.console.print(f"  [dim]{track}[/dim]", end="")
+            if delete_the_files:
+                track.path.unlink()
+                progress.console.print(" [green]deleted[/green]")
+            else:
+                progress.console.print(" [yellow]skipped (test mode)[/yellow]")
+            progress.advance(task)
+        for keep_file, new_path in rename_pairs:
+            progress.console.print(
+                f"  [dim]{keep_file.path.name}[/dim] → [dim]{new_path.name}[/dim]", end=""
+            )
+            if delete_the_files:
+                if new_path.exists():
+                    progress.console.print(" [red]rename skipped (target exists)[/red]")
                 else:
-                    progress.console.print(" [yellow]skipped (test mode)[/yellow]")
-                progress.advance(task)
+                    keep_file.path.rename(new_path)
+                    progress.console.print(" [green]renamed[/green]")
+            else:
+                progress.console.print(" [yellow]skipped (test mode)[/yellow]")
+            progress.advance(task)
 
 
 def best_track(first_file=None, second_file=None):
@@ -165,14 +199,21 @@ def find_tracks_to_delete_at_path(starting_path=".", file_type=None):
                     )
             progress.advance(task)
 
-    _print_duplicate_summary(delete_pairs)
-    return [delete for _, delete in delete_pairs]
+    rename_pairs = [
+        (keep, _rename_target(keep))
+        for keep, _ in delete_pairs
+        if _rename_target(keep) is not None
+    ]
+    _print_duplicate_summary(delete_pairs, rename_pairs)
+    return [delete for _, delete in delete_pairs], rename_pairs
 
 
-def _print_duplicate_summary(delete_pairs):
+def _print_duplicate_summary(delete_pairs, rename_pairs):
     if not delete_pairs:
         console.print("\n[green]No duplicates found.[/green]")
         return
+
+    rename_map = {keep: new_path for keep, new_path in rename_pairs}
 
     table = Table(
         title=f"Found {len(delete_pairs)} duplicate pair(s)",
@@ -184,29 +225,46 @@ def _print_duplicate_summary(delete_pairs):
     for keep, delete in delete_pairs:
         keep_path = Path(keep.full_path_name)
         delete_path = Path(delete.full_path_name)
+        rename = rename_map.get(keep)
+        keep_label = keep_path.name
+        if rename:
+            keep_label += f"\n[dim]→ {rename.name}[/dim]"
         if keep_path.parent == delete_path.parent:
             dir_prefix = f"[dim]{keep_path.parent}/[/dim]\n"
-            table.add_row(dir_prefix + keep_path.name, dir_prefix + delete_path.name)
+            table.add_row(dir_prefix + keep_label, dir_prefix + delete_path.name)
         else:
-            table.add_row(keep.full_path_name, delete.full_path_name)
+            table.add_row(keep.full_path_name + (f"\n→ {rename}" if rename else ""), delete.full_path_name)
 
     console.print(table)
 
 
 def main(cli_arguments):
     parsed = cli_parser(cli_arguments)
-    path = parsed.path
-    delete = parsed.reallydelete
-    f_type = parsed.type
     global VERBOSE
-    VERBOSE = parsed.verbose
-    if not VERBOSE:
-        VERBOSE = 0
+    VERBOSE = parsed.verbose or 0
 
-    delete_tracks(
-        find_tracks_to_delete_at_path(starting_path=path, file_type=f_type),
-        delete_the_files=delete,
+    delete_list, rename_pairs = find_tracks_to_delete_at_path(
+        starting_path=parsed.path, file_type=parsed.type
     )
+
+    if not delete_list:
+        return
+
+    if not parsed.yes:
+        answer = console.input("\nProceed? (y/[bold]N[/bold]): ").strip().lower()
+        if answer != "y":
+            console.print("[yellow]Aborted.[/yellow]")
+            return
+
+    if not parsed.reallydelete:
+        console.print(
+            f"[yellow]Test mode — add --reallydelete to delete {len(delete_list)} file(s)"
+            + (f" and rename {len(rename_pairs)}" if rename_pairs else "")
+            + ".[/yellow]"
+        )
+        return
+
+    delete_tracks(delete_list, rename_pairs, delete_the_files=True)
 
 
 if __name__ == "__main__":

@@ -50,9 +50,12 @@ def test_find_tracks_to_delete_at_path(test_tracks):
         test_tracks["better_worse"].worse,   # amazing_track 1.m4a  → duplicate of amazing_track.m4a
         test_tracks["equal"].longer,         # Equal 1.m4a           → duplicate of Equal.m4a
     }
-    result = find_tracks_to_delete_at_path("tests/resources")
-    assert isinstance(result[0], MusicFile)
-    assert set(result) == expected_to_delete
+    delete_list, rename_pairs = find_tracks_to_delete_at_path("tests/resources")
+    assert isinstance(delete_list[0], MusicFile)
+    assert set(delete_list) == expected_to_delete
+    # equal.longer (Equal 1.m4a) has lower bitrate so it's deleted; no renames expected
+    # better_worse.worse (amazing_track 1.m4a) also deleted; no renames expected
+    assert rename_pairs == []
 
 
 def test_delete_tracks(tmpdir):
@@ -102,12 +105,14 @@ def test_main(test_tree):
     temp_dir_string = temp_dir.strpath
     complete = [n.name for n in complete]
     keep = [n.name for n in tracks_to_keep]
-    cli_args = [temp_dir_string]
+
+    # --yes bypasses the interactive prompt; without --reallydelete nothing is deleted
+    cli_args = [temp_dir_string, "--yes"]
     main(cli_args)
     remaining_tracks = [n.name for n in Path(temp_dir.strpath).glob("*.m4a")]
     assert set(complete) == set(remaining_tracks)
 
-    cli_args = [temp_dir_string, "--reallydelete"]
+    cli_args = [temp_dir_string, "--reallydelete", "--yes"]
     main(cli_args)
     remaining_tracks = [n.name for n in Path(temp_dir.strpath).glob("*.m4a")]
     assert set(remaining_tracks) == set(keep)
